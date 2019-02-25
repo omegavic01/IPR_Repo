@@ -1,0 +1,202 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Welcome to the documentation for the backend of IPR! &#8212; IPR 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="#">IPR 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-the-documentation-for-the-backend-of-ipr">
+<h1>Welcome to the documentation for the backend of IPR!<a class="headerlink" href="#welcome-to-the-documentation-for-the-backend-of-ipr" title="Permalink to this headline">¶</a></h1>
+<p>High level documentation specific to the scripts built for the IPR
+project.</p>
+<div class="section" id="notes-to-the-reader">
+<h2>Notes to the reader:<a class="headerlink" href="#notes-to-the-reader" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>These scripts have been built and run on Python 3.6.6. Recommend
+Python 3.6.6 on up if you are wanting to try these scripts.</li>
+<li>PyCharm is the IDE used in the running of these scripts within this
+project. These scripts have not been tested from the command line.</li>
+<li>Refer to .env_template file to update your .env file for your local
+variables such has URL, Username, Password. You can rename
+.env_template to .env.</li>
+<li>Refer to requirements.txt for additional packages you may need to
+install.</li>
+</ul>
+</div>
+<div class="section" id="project-organization">
+<h2>Project Organization<a class="headerlink" href="#project-organization" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">+</span><span class="n">IPR</span>                   <span class="o">&lt;-</span> <span class="n">Root</span> <span class="n">Directory</span>
+<span class="o">+</span>
+<span class="o">+--</span> <span class="n">LICENSE</span>
+<span class="o">+--</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>   <span class="o">&lt;-</span> <span class="n">The</span> <span class="n">requirements</span> <span class="n">file</span> <span class="k">for</span> <span class="n">reproducing</span> <span class="n">the</span> <span class="n">analysis</span> <span class="n">environment</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">pip</span> <span class="n">freeze</span>
+<span class="o">+--</span> <span class="n">README</span><span class="o">.</span><span class="n">md</span>          <span class="o">&lt;-</span> <span class="n">Shortcut</span> <span class="k">for</span> <span class="n">the</span> <span class="n">high</span> <span class="n">level</span> <span class="n">documentation</span> <span class="ow">in</span> <span class="n">html</span> <span class="nb">format</span><span class="o">.</span>  <span class="n">To</span> <span class="n">be</span> <span class="n">used</span> <span class="k">as</span> <span class="n">the</span> <span class="n">guide</span> <span class="k">for</span> <span class="n">this</span> <span class="n">project</span><span class="o">.</span>
+<span class="o">+--</span> <span class="o">.</span><span class="n">env</span>               <span class="o">&lt;-</span> <span class="o">.</span><span class="n">env</span> <span class="n">contains</span> <span class="n">variables</span> <span class="n">used</span> <span class="n">throughout</span> <span class="n">the</span> <span class="n">scripts</span><span class="o">.</span>  <span class="n">Listed</span> <span class="ow">in</span> <span class="o">.</span><span class="n">gitignore</span>
+<span class="o">+--</span> <span class="o">.</span><span class="n">env_template</span>      <span class="o">&lt;-</span> <span class="n">a</span> <span class="n">copy</span> <span class="n">of</span> <span class="o">.</span><span class="n">env</span> <span class="k">with</span> <span class="n">default</span> <span class="n">variables</span> <span class="n">listed</span><span class="o">.</span>  <span class="n">Convert</span> <span class="n">to</span> <span class="o">.</span><span class="n">env</span> <span class="n">file</span> <span class="k">if</span> <span class="n">needed</span><span class="o">.</span>
+<span class="o">+--</span> <span class="o">.</span><span class="n">gitignore</span>         <span class="o">&lt;-</span> <span class="n">files</span> <span class="ow">not</span> <span class="n">tracked</span> <span class="n">by</span> <span class="n">Git</span><span class="o">.</span>
+<span class="o">+--</span> <span class="n">data</span>
+<span class="o">+</span>   <span class="o">+--</span> <span class="n">external</span>       <span class="o">&lt;-</span> <span class="n">Data</span> <span class="n">brought</span> <span class="ow">in</span> <span class="n">by</span> <span class="n">our</span> <span class="n">third</span> <span class="n">party</span> <span class="n">sources</span><span class="o">.</span> <span class="p">(</span><span class="n">Unused</span><span class="p">)</span>
+<span class="o">+</span>   <span class="o">+--</span> <span class="n">interim</span>        <span class="o">&lt;-</span> <span class="n">DDI_IPR_Sorted</span><span class="o">.</span><span class="n">xlsx</span> <span class="ow">and</span> <span class="n">DDI_IPR_Unsorted</span><span class="o">.</span><span class="n">xlsx</span>
+<span class="o">+</span>   <span class="o">+--</span> <span class="n">processed</span>      <span class="o">&lt;-</span> <span class="n">DDI_to_IPR</span><span class="o">.</span><span class="n">xlsx</span>
+<span class="o">+</span>   <span class="o">+--</span> <span class="n">raw</span>            <span class="o">&lt;-</span> <span class="n">ddi_workbook</span><span class="o">.</span><span class="n">xls</span>
+<span class="o">+</span>
+<span class="o">+--</span> <span class="n">docs</span>               <span class="o">&lt;-</span> <span class="n">Path</span> <span class="n">to</span> <span class="n">index</span><span class="o">.</span><span class="n">html</span><span class="o">.</span>
+<span class="o">+</span>
+<span class="o">+--</span> <span class="n">src</span>                <span class="o">&lt;-</span> <span class="n">Source</span> <span class="n">code</span> <span class="k">for</span> <span class="n">use</span> <span class="ow">in</span> <span class="n">this</span> <span class="n">project</span><span class="o">.</span>
+<span class="o">+</span>   <span class="o">+--</span> <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>    <span class="o">&lt;-</span> <span class="n">Makes</span> <span class="n">src</span> <span class="n">a</span> <span class="n">Python</span> <span class="n">module</span>
+<span class="o">+</span>   <span class="o">+</span>
+<span class="o">+</span>   <span class="o">+--</span> <span class="n">data</span>           <span class="o">&lt;-</span> <span class="n">Scripts</span> <span class="n">to</span> <span class="n">download</span> <span class="ow">or</span> <span class="n">generate</span> <span class="n">data</span>
+<span class="o">+</span>   <span class="o">+</span>   <span class="o">+--</span> <span class="n">ipam_query_full_ipam_data</span><span class="o">.</span><span class="n">py</span>
+<span class="o">+</span>   <span class="o">+</span>   <span class="o">+--</span> <span class="n">ddi_to_master</span><span class="o">.</span><span class="n">py</span>
+<span class="o">+</span>   <span class="o">+</span>   <span class="o">+--</span> <span class="n">master_audit</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="request-and-compile-ddi-data-and-generate-ipr-requested-output">
+<h1>Request and Compile DDI Data and Generate IPR Requested Output<a class="headerlink" href="#request-and-compile-ddi-data-and-generate-ipr-requested-output" title="Permalink to this headline">¶</a></h1>
+<p>By following the below listed python scripts you will be following the
+step by step process that is currently in use by the IPR Team. To both
+request and compile the IB DDI IPAM data into a format as requested by
+IPR. The final output being DDI_to_IPR.xlsx. Future development of
+scripts and documentation for creating import sheets for IB based off of
+changes to DDI_to_IPR.xlsx has been road mapped.</p>
+<div class="section" id="ipam-query-app-full-report-xls-py">
+<h2>ipam_query_app_full_report_xls.py<a class="headerlink" href="#ipam-query-app-full-report-xls-py" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Output File: ddi_workbook.xls</li>
+</ul>
+<p>Summary: This is the initial script used to query IB’s DDI solution (AKA
+DDI).</p>
+<p>From here this queries DDI for all of the Network Views within DDI. It
+uses this list to then query for all of the networks and
+networkcontainers defined within each Network View. Once it runs through
+the list of Network Views it then generates the output file listed
+above.</p>
+</div>
+<div class="section" id="ddi-to-master-py">
+<h2>ddi_to_master.py<a class="headerlink" href="#ddi-to-master-py" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Input File: ddi_workbook.xls</li>
+<li>Output File: DDI_IPR_Unsorted.xlsx</li>
+</ul>
+<p>Summary: This is the script that takes in the ddi data previously
+received. It then converts, mashes, and separates the ddi data and
+generates the output file listed above.</p>
+</div>
+<div class="section" id="master-audit-py">
+<h2>master_audit.py<a class="headerlink" href="#master-audit-py" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Input File: DDI_IPR_Unsorted.xlsx</li>
+<li>Interim File: DDI_IPR_Sorted.xlsx</li>
+<li>Output File: DDI-to-IPR.xlsx</li>
+</ul>
+<p>Summary: This script will sort all of the Networks listed within the
+input file. From here it will perform a validation check which contains
+a list of filters based on IPR’s needs. Once the validation check is
+passed it then moves into an index function. There is a unique index
+number assigned to each network listed within the input file. At which
+point it performs a conflict check as well as an overlap check. The
+index numbers are then used as a tag for when a conflict or an overlap
+occurs and updated in the appropriate cell. This is the final output for
+IPR.</p>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>genindex</li>
+<li>modindex</li>
+<li>search</li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to the documentation for the backend of IPR!</a><ul>
+<li><a class="reference internal" href="#notes-to-the-reader">Notes to the reader:</a></li>
+<li><a class="reference internal" href="#project-organization">Project Organization</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#request-and-compile-ddi-data-and-generate-ipr-requested-output">Request and Compile DDI Data and Generate IPR Requested Output</a><ul>
+<li><a class="reference internal" href="#ipam-query-app-full-report-xls-py">ipam_query_app_full_report_xls.py</a></li>
+<li><a class="reference internal" href="#ddi-to-master-py">ddi_to_master.py</a></li>
+<li><a class="reference internal" href="#master-audit-py">master_audit.py</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="#">IPR 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,109 @@
+
+Welcome to the documentation for the backend of IPR!
+====================================================
+
+High level documentation specific to the scripts built for the IPR
+project.
+
+Notes to the reader:
+--------------------
+
+-  These scripts have been built and run on Python 3.6.6. Recommend
+   Python 3.6.6 on up if you are wanting to try these scripts.
+-  PyCharm is the IDE used in the running of these scripts within this
+   project. These scripts have not been tested from the command line.
+-  Refer to .env_template file to update your .env file for your local
+   variables such has URL, Username, Password. You can rename
+   .env_template to .env.
+-  Refer to requirements.txt for additional packages you may need to
+   install.
+
+Project Organization
+--------------------
+
+::
+
+    +IPR                   <- Root Directory
+    +
+    +-- LICENSE
+    +-- requirements.txt   <- The requirements file for reproducing the analysis environment, e.g. pip freeze
+    +-- README.md          <- Shortcut for the high level documentation in html format.  To be used as the guide for this project.
+    +-- .env               <- .env contains variables used throughout the scripts.  Listed in .gitignore
+    +-- .env_template      <- a copy of .env with default variables listed.  Convert to .env file if needed.
+    +-- .gitignore         <- files not tracked by Git.
+    +-- data
+    +   +-- external       <- Data brought in by our third party sources. (Unused)
+    +   +-- interim        <- DDI_IPR_Sorted.xlsx and DDI_IPR_Unsorted.xlsx
+    +   +-- processed      <- DDI_to_IPR.xlsx
+    +   +-- raw            <- ddi_workbook.xls
+    +
+    +-- docs               <- Path to index.html.
+    +
+    +-- src                <- Source code for use in this project.
+    +   +-- __init__.py    <- Makes src a Python module
+    +   +
+    +   +-- data           <- Scripts to download or generate data
+    +   +   +-- ipam_query_full_ipam_data.py
+    +   +   +-- ddi_to_master.py
+    +   +   +-- master_audit.py
+
+--------------
+
+Request and Compile DDI Data and Generate IPR Requested Output
+==============================================================
+
+By following the below listed python scripts you will be following the
+step by step process that is currently in use by the IPR Team. To both
+request and compile the IB DDI IPAM data into a format as requested by
+IPR. The final output being DDI_to_IPR.xlsx. Future development of
+scripts and documentation for creating import sheets for IB based off of
+changes to DDI_to_IPR.xlsx has been road mapped.
+
+ipam_query_app_full_report_xls.py
+---------------------------------
+
+-  Output File: ddi_workbook.xls
+
+Summary: This is the initial script used to query IB’s DDI solution (AKA
+DDI).
+
+From here this queries DDI for all of the Network Views within DDI. It
+uses this list to then query for all of the networks and
+networkcontainers defined within each Network View. Once it runs through
+the list of Network Views it then generates the output file listed
+above.
+
+ddi_to_master.py
+----------------
+
+-  Input File: ddi_workbook.xls
+-  Output File: DDI_IPR_Unsorted.xlsx
+
+Summary: This is the script that takes in the ddi data previously
+received. It then converts, mashes, and separates the ddi data and
+generates the output file listed above.
+
+master_audit.py
+---------------
+
+-  Input File: DDI_IPR_Unsorted.xlsx
+-  Interim File: DDI_IPR_Sorted.xlsx
+-  Output File: DDI-to-IPR.xlsx
+
+Summary: This script will sort all of the Networks listed within the
+input file. From here it will perform a validation check which contains
+a list of filters based on IPR’s needs. Once the validation check is
+passed it then moves into an index function. There is a unique index
+number assigned to each network listed within the input file. At which
+point it performs a conflict check as well as an overlap check. The
+index numbers are then used as a tag for when a conflict or an overlap
+occurs and updated in the appropriate cell. This is the final output for
+IPR.
+
+Indices and tables
+==================
+
+-  genindex
+-  modindex
+-  search
+
