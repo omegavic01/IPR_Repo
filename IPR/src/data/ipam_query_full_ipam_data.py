@@ -15,7 +15,7 @@ def write_log(logs, path):
     """For use when a view within IPAM does not have a network or network
     container built within the view.
     """
-    with open(os.path.join(path, 'log.txt'), 'w') as file_log:
+    with open(path, 'w') as file_log:
         for log in logs:
             file_log.write(log + '- Has no network or network container')
             file_log.write('\n')

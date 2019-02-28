@@ -20,51 +20,54 @@ from checks.master_audit_validation_check import validation_check
 
 
 def _wr_out_validation_check(master_sh, master_cidr_data, log_file):
-    with open(log_file, mode='r') as file_input:
-        adump = file_input.readlines()
-    cidrcount = 0
-    changes = False
-    for item in adump:
-        if 'Leading zero' in item:
-            changes = True
-            a_line = item.strip()
-            blist = a_line.split(' ')
-            newcidr = blist[-1]
-            oldcidr = blist[0]
-            for index, zero_data in enumerate(list(master_cidr_data)):
-                if oldcidr.strip() == zero_data[0].value.strip():
-                    master_sh.cell(index+1, 2).value = newcidr
-                    master_sh.cell(index+1, 18).value = int(newcidr
-                                                            .split('.')[0])
-                    master_sh.cell(index+1, 19).value = int(newcidr
-                                                            .split('.')[1])
-                    master_sh.cell(index+1, 20).value = int(newcidr
-                                                            .split('.')[2])
-                    master_sh.cell(index+1, 21).value = \
-                        int(newcidr.split('.')[3].split('/')[0])
-                    master_sh.cell(index+1, 22).value = \
-                        int(newcidr.split('.')[3].split('/')[1])
-        if 'Network is' in item:
-            changes = True
-            a_line = item.strip()
-            blist = a_line.split(' ')
-            newcidr = blist[-1]
-            oldcidr = blist[0]
-            for index, host_bits in enumerate(list(master_cidr_data)):
-                if oldcidr.strip() == host_bits[0].value.strip():
-                    master_sh.cell(index+1, 2).value = newcidr
-                    master_sh.cell(index+1, 18).value = int(newcidr
-                                                            .split('.')[0])
-                    master_sh.cell(index+1, 19).value = int(newcidr
-                                                            .split('.')[1])
-                    master_sh.cell(index+1, 20).value = int(newcidr
-                                                            .split('.')[2])
-                    master_sh.cell(index+1, 21).value = \
-                        int(newcidr.split('.')[3].split('/')[0])
-                    master_sh.cell(index+1, 22).value = \
-                        int(newcidr.split('.')[3].split('/')[1])
-        if 'out of range CIDR' in item:
-            cidrcount += 1
+    try:
+        with open(log_file, mode='r') as file_input:
+            adump = file_input.readlines()
+        cidrcount = 0
+        changes = False
+        for item in adump:
+            if 'Leading zero' in item:
+                changes = True
+                a_line = item.strip()
+                blist = a_line.split(' ')
+                newcidr = blist[-1]
+                oldcidr = blist[0]
+                for index, zero_data in enumerate(list(master_cidr_data)):
+                    if oldcidr.strip() == zero_data[0].value.strip():
+                        master_sh.cell(index+1, 2).value = newcidr
+                        master_sh.cell(index+1, 18).value = int(newcidr
+                                                                .split('.')[0])
+                        master_sh.cell(index+1, 19).value = int(newcidr
+                                                                .split('.')[1])
+                        master_sh.cell(index+1, 20).value = int(newcidr
+                                                                .split('.')[2])
+                        master_sh.cell(index+1, 21).value = \
+                            int(newcidr.split('.')[3].split('/')[0])
+                        master_sh.cell(index+1, 22).value = \
+                            int(newcidr.split('.')[3].split('/')[1])
+            if 'Network is' in item:
+                changes = True
+                a_line = item.strip()
+                blist = a_line.split(' ')
+                newcidr = blist[-1]
+                oldcidr = blist[0]
+                for index, host_bits in enumerate(list(master_cidr_data)):
+                    if oldcidr.strip() == host_bits[0].value.strip():
+                        master_sh.cell(index+1, 2).value = newcidr
+                        master_sh.cell(index+1, 18).value = int(newcidr
+                                                                .split('.')[0])
+                        master_sh.cell(index+1, 19).value = int(newcidr
+                                                                .split('.')[1])
+                        master_sh.cell(index+1, 20).value = int(newcidr
+                                                                .split('.')[2])
+                        master_sh.cell(index+1, 21).value = \
+                            int(newcidr.split('.')[3].split('/')[0])
+                        master_sh.cell(index+1, 22).value = \
+                            int(newcidr.split('.')[3].split('/')[1])
+            if 'out of range CIDR' in item:
+                cidrcount += 1
+    except FileNotFoundError:
+        return 'Clean'
     if len(adump) == cidrcount:
         return 'Just Cidrs'
     if changes:
@@ -72,25 +75,36 @@ def _wr_out_validation_check(master_sh, master_cidr_data, log_file):
     return 'Unclean'
 
 
-def _wr_out_conflict(external_file, dict_of_conflicts, cidr_set):
+def _wr_out_conflict(external_file, conflict_dicts, cidr_set):
     master_wb = openpyxl.load_workbook(filename=external_file)
     master_ws = master_wb['MASTER']
-    overlapcol = 25
-    master_ws.cell(row=1, column=overlapcol, value='Conflict Subnet')
+    conflict_col = 25
+    index_col = 22
+    master_rows = list(master_ws.rows)
+    master_ws.cell(row=1, column=conflict_col, value='Conflict Subnet')
     for index, item in enumerate(cidr_set):
-        for key in dict_of_conflicts:
-            if key == item and len(dict_of_conflicts[key]) > 1:
-                master_ws.cell(row=index + 2, column=overlapcol,
-                               value=', '.join(str(x) for x
-                                               in dict_of_conflicts[key]))
+        if item in conflict_dicts:
+            if len(conflict_dicts[item]) > 1:
+                temp_list = conflict_dicts[item][:]
+                if master_rows[index + 1][index_col].value in temp_list:
+                    temp_list.remove(master_rows[index + 1][index_col].value)
+                    if len(temp_list) == 1:
+                        master_ws.cell(row=index + 2, column=conflict_col,
+                                       value=int(temp_list[0]))
+                        continue
+                    if len(temp_list) > 1:
+                        master_ws.cell(row=index + 2, column=conflict_col,
+                                       value=', '.join(str(x) for x in
+                                                       temp_list))
+                        continue
     master_wb.save(external_file)
 
 
 def _wr_out_overlap(interim_file, external_file, dict_of_overlaps, cidr_set):
     master_wb = openpyxl.load_workbook(filename=interim_file)
     master_ws = master_wb['MASTER']
-    overlapcol = 24
-    master_ws.cell(row=1, column=overlapcol,
+    overlap_col = 24
+    master_ws.cell(row=1, column=overlap_col,
                    value='Subnet Overlap - Index No.')
     for index, item in enumerate(cidr_set):
         for key in dict_of_overlaps:
@@ -99,12 +113,12 @@ def _wr_out_overlap(interim_file, external_file, dict_of_overlaps, cidr_set):
             if not dict_of_overlaps[key] and key == item:
                 continue
             if key == item and len(dict_of_overlaps[key]) == 1:
-                mycell = master_ws.cell(row=index + 2, column=overlapcol)
+                mycell = master_ws.cell(row=index + 2, column=overlap_col)
                 mycell.alignment = Alignment(horizontal='left')
                 mycell.value = int(dict_of_overlaps[key][0])
                 continue
             if key == item:
-                master_ws.cell(row=index + 2, column=overlapcol,
+                master_ws.cell(row=index + 2, column=overlap_col,
                                value=', '.join(str(x) for x
                                                in dict_of_overlaps[key]))
     master_wb.save(external_file)
@@ -124,7 +138,6 @@ def _conflict_overlap_check(interim_file):
     for i in m_list_cidr_set:
         m_dict_overlap[i] = []
         m_dict_conflict[i] = []
-    print('Performing overlap and conflict identification!')
     for key in m_dict_overlap:
         for item in m_cidr_index_zip:
             if key == item[0]:  # Conflict check
@@ -141,26 +154,12 @@ def _indexing_data(interim_file):
     master_index_col = list(master_sheet.iter_cols(min_col=23, max_col=23))
 
     def _indexing(master_sh):
-        s2s = 50001
-        cloud = 60001
-        ip_addr = 10001
+        ip_addr = 10002
         indexcol = 23
         master_view_col = list(master_sh.iter_cols(min_col=16, max_col=16))
         master_sh.cell(row=1, column=indexcol, value='Index')
         for index, item in enumerate(master_view_col[0]):
             if 'DDI View' in item.value:
-                continue
-            if 's2s' in item.value:
-                mycell = master_sh.cell(row=index + 1, column=indexcol)
-                mycell.alignment = Alignment(horizontal='left')
-                mycell.value = s2s
-                s2s += 1
-                continue
-            if 'Cloud' in item.value:
-                mycell = master_sh.cell(row=index + 1, column=indexcol)
-                mycell.alignment = Alignment(horizontal='left')
-                mycell.value = cloud
-                cloud += 1
                 continue
             mycell = master_sh.cell(row=index + 1, column=indexcol)
             mycell.alignment = Alignment(horizontal='left')
@@ -214,9 +213,7 @@ def _ip_validation(processed_file, log_file):
     if vcheck != 'Unclean':
         print('Validation Check was clean.')
     else:
-        print(r"""Failed validation check: (refer to:) C:\Users\hvictor\
-        Documents\DMSP\Documentation\Projects\Reconsolidation IP Project\
-        scripts\Data""")
+        print(r'Failed validation check: (Refer to) validation_log.txt')
         if output_status == 'Just Cidrs':
             print(r'Just incorrectly assigned cidrs.  Continuing on!')
         if output_status == 'Changes':
@@ -245,10 +242,12 @@ def main():
     if IPNetwork("10.11.12.0/24") in IPNetwork("10.11.0.0/16"):
         print "Yes it is!"
     """
+    logger = logging.getLogger(__name__)
+    logger.info('Beginning of Script')
     # Build path's.
     interim_data_path = os.path.join(PROJECT_DIR, 'data', 'interim')
     processed_data_path = os.path.join(PROJECT_DIR, 'data', 'processed')
-    log_data_path = os.path.join(PROJECT_DIR, 'src', 'data')
+    log_data_path = os.path.join(PROJECT_DIR, 'data', 'processed')
 
     # Join file names to path's.
     interim_unsorted_ddi_file = os.path.join(interim_data_path,
@@ -258,26 +257,32 @@ def main():
     processed_ddi_file = os.path.join(processed_data_path, 'DDI_to_IPR.xlsx')
     validation_log_file = os.path.join(log_data_path, 'validation_log.txt')
 
+    logger.info('Performing IP Validation Check')
     # IP Validation check:
     _ip_validation(interim_unsorted_ddi_file, validation_log_file)
 
+    logger.info('Sorting Data')
     # Sorting data for indexing.
     _sorting_data(interim_unsorted_ddi_file, interim_sorted_ddi_file)
 
+    logger.info('Indexing Data')
     # Indexing for the networks listed.
     _indexing_data(interim_sorted_ddi_file)
 
+    logger.info('Performing Overlap and Conflict Check')
     # Overlap and Conflict check.
     dct_ovrlp, \
         dct_cnflct, \
         m_cidr_list = _conflict_overlap_check(interim_sorted_ddi_file)
 
+    logger.info('Writing out compiled data.')
     # Write overlap data into final output.
     _wr_out_overlap(interim_sorted_ddi_file, processed_ddi_file,
                     dct_ovrlp, m_cidr_list)
 
     # Write conflict data into final output.
     _wr_out_conflict(processed_ddi_file, dct_cnflct, m_cidr_list)
+    logger.info('Script Complete')
 
 
 if __name__ == '__main__':

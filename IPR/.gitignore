@@ -80,6 +80,7 @@ target/
 /data/processed/*.xlsx
 /data/external/
 /data/raw/*.xls
+/data/raw/*.txt
 
 # Mac OS-specific storage files
 .DS_Store

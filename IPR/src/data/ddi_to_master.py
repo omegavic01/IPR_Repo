@@ -71,6 +71,9 @@ def main():
     Output Arguments:
         outputddilist = list of rows from spreadsheet.
     """
+    # get logger
+    logger = logging.getLogger(__name__)
+    logger.info('Beginning of Script')
     # Build paths and file names.
     raw_data_path = os.path.join(PROJECT_DIR, 'data', 'raw')
     interim_data_path = os.path.join(PROJECT_DIR, 'data', 'interim')
@@ -82,12 +85,20 @@ def main():
     rddi = open_workbook(ddi_file)
     rddifirst_sheet = rddi.sheet_by_index(0)
 
+    logger.info('Filtering out unneeded data.')
     #  For filtering out data not needed.
     output_ddi_list = []
     for i in range(rddifirst_sheet.nrows):
         if i == 0:
             continue
         if '/32' in rddifirst_sheet.row_values(i)[2]:
+            continue
+        if '100.88.0.0/29' in rddifirst_sheet.row_values(i)[3]:
+            continue
+        if '100.64.0.0/29' in rddifirst_sheet.row_values(i)[3]:
+            continue
+        if 'free ip' in rddifirst_sheet.row_values(i)[5].lower() \
+                and '00890' in rddifirst_sheet.row_values(i)[4]:
             continue
         if int(rddifirst_sheet.row_values(i)[2][1:3]) in range(1, 16):
             continue
@@ -101,7 +112,9 @@ def main():
             output_ddi_list.append(rddifirst_sheet.row_values(i))
 
     # Send information for processing and to write output.
+    logger.info('Writing out DDI-to-IPR-Format-Unsorted.xlsx')
     _write_output_to_master(output_ddi_list, interim_ddi_file)
+    logger.info('Script Complete')
 
 
 if __name__ == '__main__':
