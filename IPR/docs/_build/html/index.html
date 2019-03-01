@@ -63,10 +63,10 @@ install.</li>
 <span class="o">+--</span> <span class="o">.</span><span class="n">env_template</span>      <span class="o">&lt;-</span> <span class="n">a</span> <span class="n">copy</span> <span class="n">of</span> <span class="o">.</span><span class="n">env</span> <span class="k">with</span> <span class="n">default</span> <span class="n">variables</span> <span class="n">listed</span><span class="o">.</span>  <span class="n">Convert</span> <span class="n">to</span> <span class="o">.</span><span class="n">env</span> <span class="n">file</span> <span class="k">if</span> <span class="n">needed</span><span class="o">.</span>
 <span class="o">+--</span> <span class="o">.</span><span class="n">gitignore</span>         <span class="o">&lt;-</span> <span class="n">files</span> <span class="ow">not</span> <span class="n">tracked</span> <span class="n">by</span> <span class="n">Git</span><span class="o">.</span>
 <span class="o">+--</span> <span class="n">data</span>
-<span class="o">+</span>   <span class="o">+--</span> <span class="n">external</span>       <span class="o">&lt;-</span> <span class="n">Data</span> <span class="n">brought</span> <span class="ow">in</span> <span class="n">by</span> <span class="n">our</span> <span class="n">third</span> <span class="n">party</span> <span class="n">sources</span><span class="o">.</span> <span class="p">(</span><span class="n">Unused</span><span class="p">)</span>
-<span class="o">+</span>   <span class="o">+--</span> <span class="n">interim</span>        <span class="o">&lt;-</span> <span class="n">DDI_IPR_Sorted</span><span class="o">.</span><span class="n">xlsx</span> <span class="ow">and</span> <span class="n">DDI_IPR_Unsorted</span><span class="o">.</span><span class="n">xlsx</span>
-<span class="o">+</span>   <span class="o">+--</span> <span class="n">processed</span>      <span class="o">&lt;-</span> <span class="n">DDI_to_IPR</span><span class="o">.</span><span class="n">xlsx</span>
-<span class="o">+</span>   <span class="o">+--</span> <span class="n">raw</span>            <span class="o">&lt;-</span> <span class="n">ddi_workbook</span><span class="o">.</span><span class="n">xls</span>
+<span class="o">+</span>   <span class="o">+--</span> <span class="n">external</span>       <span class="o">&lt;-</span> <span class="p">(</span><span class="n">Unused</span><span class="p">)</span>
+<span class="o">+</span>   <span class="o">+--</span> <span class="n">interim</span>        <span class="o">&lt;-</span> <span class="n">When</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">middle</span> <span class="n">of</span> <span class="n">being</span> <span class="n">transformed</span><span class="o">.</span>
+<span class="o">+</span>   <span class="o">+--</span> <span class="n">processed</span>      <span class="o">&lt;-</span> <span class="n">Final</span> <span class="n">location</span> <span class="n">of</span> <span class="n">finished</span> <span class="n">products</span>
+<span class="o">+</span>   <span class="o">+--</span> <span class="n">raw</span>            <span class="o">&lt;-</span> <span class="n">Used</span> <span class="k">for</span> <span class="n">raw</span> <span class="n">data</span> <span class="n">gathered</span> <span class="ow">or</span> <span class="n">used</span> <span class="ow">in</span> <span class="n">scripts</span>
 <span class="o">+</span>
 <span class="o">+--</span> <span class="n">docs</span>               <span class="o">&lt;-</span> <span class="n">Path</span> <span class="n">to</span> <span class="n">index</span><span class="o">.</span><span class="n">html</span><span class="o">.</span>
 <span class="o">+</span>
@@ -77,6 +77,8 @@ install.</li>
 <span class="o">+</span>   <span class="o">+</span>   <span class="o">+--</span> <span class="n">ipam_query_full_ipam_data</span><span class="o">.</span><span class="n">py</span>
 <span class="o">+</span>   <span class="o">+</span>   <span class="o">+--</span> <span class="n">ddi_to_master</span><span class="o">.</span><span class="n">py</span>
 <span class="o">+</span>   <span class="o">+</span>   <span class="o">+--</span> <span class="n">master_audit</span><span class="o">.</span><span class="n">py</span>
+<span class="o">+</span>   <span class="o">+--</span> <span class="n">features</span>       <span class="o">&lt;-</span> <span class="n">Scripts</span> <span class="n">that</span> <span class="n">generate</span> <span class="n">reports</span>
+<span class="o">+</span>   <span class="o">+</span>   <span class="o">+--</span> <span class="n">ipr_report_percent</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
 </div>
@@ -131,6 +133,20 @@ occurs and updated in the appropriate cell. This is the final output for
 IPR.</p>
 </div>
 </div>
+<div class="section" id="features">
+<h1>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="ipr-report-percent-py">
+<h2>ipr_report_percent.py<a class="headerlink" href="#ipr-report-percent-py" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Input File: DDI_to_IPR.xlsx</li>
+<li>Template File: MASTER - Report by percent template.xlsx</li>
+<li>Output File: MASTER - Report by percent.xlsx</li>
+</ul>
+<p>Summary: Very simple script that takes an input file and a template
+file. Add’s the data from the Input file to the second sheet of the
+template file. Then saves the update .xlsx file as the output file.</p>
+</div>
+</div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
@@ -157,6 +173,10 @@ IPR.</p>
 <li><a class="reference internal" href="#ipam-query-app-full-report-xls-py">ipam_query_app_full_report_xls.py</a></li>
 <li><a class="reference internal" href="#ddi-to-master-py">ddi_to_master.py</a></li>
 <li><a class="reference internal" href="#master-audit-py">master_audit.py</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#features">Features</a><ul>
+<li><a class="reference internal" href="#ipr-report-percent-py">ipr_report_percent.py</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>

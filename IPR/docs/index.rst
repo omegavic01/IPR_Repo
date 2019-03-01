@@ -32,10 +32,10 @@ Project Organization
     +-- .env_template      <- a copy of .env with default variables listed.  Convert to .env file if needed.
     +-- .gitignore         <- files not tracked by Git.
     +-- data
-    +   +-- external       <- Data brought in by our third party sources. (Unused)
-    +   +-- interim        <- DDI_IPR_Sorted.xlsx and DDI_IPR_Unsorted.xlsx
-    +   +-- processed      <- DDI_to_IPR.xlsx
-    +   +-- raw            <- ddi_workbook.xls
+    +   +-- external       <- (Unused)
+    +   +-- interim        <- When data is in the middle of being transformed.
+    +   +-- processed      <- Final location of finished products
+    +   +-- raw            <- Used for raw data gathered or used in scripts
     +
     +-- docs               <- Path to index.html.
     +
@@ -46,6 +46,8 @@ Project Organization
     +   +   +-- ipam_query_full_ipam_data.py
     +   +   +-- ddi_to_master.py
     +   +   +-- master_audit.py
+    +   +-- features       <- Scripts that generate reports
+    +   +   +-- ipr_report_percent.py
 
 --------------
 
@@ -100,10 +102,23 @@ index numbers are then used as a tag for when a conflict or an overlap
 occurs and updated in the appropriate cell. This is the final output for
 IPR.
 
+Features
+========
+
+ipr_report_percent.py
+---------------------
+
+-  Input File: DDI_to_IPR.xlsx
+-  Template File: MASTER - Report by percent template.xlsx
+-  Output File: MASTER - Report by percent.xlsx
+
+Summary: Very simple script that takes an input file and a template
+file. Add’s the data from the Input file to the second sheet of the
+template file. Then saves the update .xlsx file as the output file.
+
 Indices and tables
 ==================
 
 -  genindex
 -  modindex
 -  search
-

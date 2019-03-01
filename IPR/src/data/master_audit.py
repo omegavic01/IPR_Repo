@@ -75,8 +75,32 @@ def _wr_out_validation_check(master_sh, master_cidr_data, log_file):
     return 'Unclean'
 
 
-def _wr_out_conflict(external_file, conflict_dicts, cidr_set):
-    master_wb = openpyxl.load_workbook(filename=external_file)
+def _wr_out_overlap_conflict_tag(processed_file):
+    master_wb = openpyxl.load_workbook(filename=processed_file)
+    master_ws = master_wb['MASTER']
+    master_rows = list(master_ws.rows)
+    no_overlap_col = 26
+    no_conflict_col = 27
+    master_ws.cell(row=1, column=no_overlap_col,
+                   value='No Overlap')
+    master_ws.cell(row=1, column=no_conflict_col,
+                   value='No Conflict')
+    for enum, row in enumerate(master_rows):
+        if enum == 0:
+            continue
+        if row[23].value is not None:
+            master_ws.cell(row=enum + 1, column=no_overlap_col, value='NO')
+        else:
+            master_ws.cell(row=enum + 1, column=no_overlap_col, value='YES')
+        if row[24].value is not None:
+            master_ws.cell(row=enum + 1, column=no_conflict_col, value='NO')
+        else:
+            master_ws.cell(row=enum + 1, column=no_conflict_col, value='YES')
+    master_wb.save(processed_file)
+
+
+def _wr_out_conflict(processed_file, conflict_dicts, cidr_set):
+    master_wb = openpyxl.load_workbook(filename=processed_file)
     master_ws = master_wb['MASTER']
     conflict_col = 25
     index_col = 22
@@ -97,10 +121,10 @@ def _wr_out_conflict(external_file, conflict_dicts, cidr_set):
                                        value=', '.join(str(x) for x in
                                                        temp_list))
                         continue
-    master_wb.save(external_file)
+    master_wb.save(processed_file)
 
 
-def _wr_out_overlap(interim_file, external_file, dict_of_overlaps, cidr_set):
+def _wr_out_overlap(interim_file, processed_file, dict_of_overlaps, cidr_set):
     master_wb = openpyxl.load_workbook(filename=interim_file)
     master_ws = master_wb['MASTER']
     overlap_col = 24
@@ -121,7 +145,7 @@ def _wr_out_overlap(interim_file, external_file, dict_of_overlaps, cidr_set):
                 master_ws.cell(row=index + 2, column=overlap_col,
                                value=', '.join(str(x) for x
                                                in dict_of_overlaps[key]))
-    master_wb.save(external_file)
+    master_wb.save(processed_file)
 
 
 def _conflict_overlap_check(interim_file):
@@ -282,6 +306,9 @@ def main():
 
     # Write conflict data into final output.
     _wr_out_conflict(processed_ddi_file, dct_cnflct, m_cidr_list)
+
+    # Write in overlap and conflict tags.
+    _wr_out_overlap_conflict_tag(processed_ddi_file)
     logger.info('Script Complete')
 
 
