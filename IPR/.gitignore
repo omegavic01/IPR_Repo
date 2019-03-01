@@ -107,6 +107,4 @@ Makefile
 setup.py
 test_environment.py
 tox.ini
-IPR/src/data/make_dataset.py
 IPR/src/data/*._log.txt
-IPR/src/features/build_features.py
