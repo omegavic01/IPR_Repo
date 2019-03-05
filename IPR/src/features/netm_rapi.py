@@ -21,7 +21,7 @@ def api_devices(path):
                                 PAYLOAD['username'], PAYLOAD['password']))
         if limit != 0:
             object_type = "/api/" + PAYLOAD['api_version'] + \
-                          "/devices/index?limit=" + total
+                          "/devices/index?limit=" + str(limit)
             data = requests.get(url + PAYLOAD['host'] + object_type,
                                 verify=False, auth=(PAYLOAD['username'],
                                                     PAYLOAD['password']))
