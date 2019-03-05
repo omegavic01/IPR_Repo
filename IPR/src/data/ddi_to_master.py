@@ -88,13 +88,13 @@ def main():
     logger.info('Filtering out unneeded data.')
     #  For filtering out data not needed.
     ddi_dict = {'MASTER': [],
-                'All_/32': [],
-                '100.88/29': [],
-                '100.64/29': [],
-                'Free-ip-00890': [],
-                '/15-to-/1 Cidrs': [],
-                'Public-ip': [],
-                'Wan_test': []}
+                'Filt-Cidr-32': [],
+                'Filt-100.88-Cidr-29': [],
+                'Filt-100.64-Cidr-29': [],
+                'Filt-Free-ip-00890': [],
+                'Filt-Cidr-15-to-Cidr-1': [],
+                'Filt-Public-ip': [],
+                'Filt-Wan_test': []}
     for i in range(rddifirst_sheet.nrows):
         if i == 0:
             continue
