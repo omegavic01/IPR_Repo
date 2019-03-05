@@ -87,33 +87,47 @@ def main():
 
     logger.info('Filtering out unneeded data.')
     #  For filtering out data not needed.
-    output_ddi_list = []
+    ddi_dict = {'MASTER': [],
+                'All_/32': [],
+                '100.88/29': [],
+                '100.64/29': [],
+                'Free-ip-00890': [],
+                '/15-to-/1 Cidrs': [],
+                'Public-ip': [],
+                'Wan_test': []}
     for i in range(rddifirst_sheet.nrows):
         if i == 0:
             continue
         if '/32' in rddifirst_sheet.row_values(i)[2]:
+            ddi_dict['All_/32'].append().append(rddifirst_sheet.row_values(i))
             continue
         if '100.88.0.0/29' in rddifirst_sheet.row_values(i)[3]:
+            ddi_dict['100.88/29'].append(rddifirst_sheet.row_values(i))
             continue
         if '100.64.0.0/29' in rddifirst_sheet.row_values(i)[3]:
+            ddi_dict['100.64/29'].append(rddifirst_sheet.row_values(i))
             continue
         if 'free ip' in rddifirst_sheet.row_values(i)[5].lower() \
                 and '00890' in rddifirst_sheet.row_values(i)[4]:
+            ddi_dict['Free-ip-00890'].append(rddifirst_sheet.row_values(i))
             continue
         if int(rddifirst_sheet.row_values(i)[2][1:3]) in range(1, 16):
+            ddi_dict['/15-to-/1 Cidrs'].append(rddifirst_sheet.row_values(i))
             continue
         if rddifirst_sheet.row_values(i)[4] == 'Public-IP':
+            ddi_dict['Public-ip'].append(rddifirst_sheet.row_values(i))
             continue
         if rddifirst_sheet.row_values(i)[4] == 'wan_test':
+            ddi_dict['Wan_test'].append(rddifirst_sheet.row_values(i))
             continue
         if IPv4Network(rddifirst_sheet.row_values(i)[1]).is_private:
-            output_ddi_list.append(rddifirst_sheet.row_values(i))
+            ddi_dict['MASTER'].append(rddifirst_sheet.row_values(i))
         elif IPv4Network(rddifirst_sheet.row_values(i)[1]).is_cgn:
-            output_ddi_list.append(rddifirst_sheet.row_values(i))
+            ddi_dict['MASTER'].append(rddifirst_sheet.row_values(i))
 
     # Send information for processing and to write output.
     logger.info('Writing out DDI-to-IPR-Format-Unsorted.xlsx')
-    _write_output_to_master(output_ddi_list, interim_ddi_file)
+    _write_output_to_master(ddi_dict, interim_ddi_file)
     logger.info('Script Complete')
 
 
