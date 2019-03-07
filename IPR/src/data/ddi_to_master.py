@@ -131,7 +131,7 @@ def main():
     interim_unsorted_ddi_file = os.path.join(interim_data_path,
                                              'DDI_IPR_Unsorted.xlsx')
     interim_sorted_ddi_file = os.path.join(interim_data_path,
-                                           'Int_DDI_IPR_Sorted.xlsx')
+                                           'DDI_IPR_Sorted.xlsx')
 
     # Opens ddi_workbook.xls
     rddi = open_workbook(ddi_file)
@@ -182,9 +182,9 @@ def main():
             ddi_dict['MASTER'].append(rddifirst_sheet.row_values(i))
 
     # Send information for processing and to write output.
-    logger.info('Writing out DDI-to-IPR-Format-Unsorted.xlsx')
+    logger.info('Building Data Set for Sorting')
     _write_output_to_master(ddi_dict, interim_unsorted_ddi_file)
-    logger.info('Sorting Data.')
+    logger.info('Sorting Data and writing out DDI_IPR_Sorted.xlsx.')
     _sorting_data(interim_sorted_ddi_file, interim_unsorted_ddi_file)
     logger.info('Script Complete')
 

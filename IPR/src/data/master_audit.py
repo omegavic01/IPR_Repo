@@ -249,8 +249,6 @@ def main():
     log_data_path = os.path.join(PROJECT_DIR, 'data', 'processed')
 
     # Join file names to path's.
-    interim_unsorted_ddi_file = os.path.join(interim_data_path,
-                                             'DDI_IPR_Unsorted.xlsx')
     interim_sorted_ddi_file = os.path.join(interim_data_path,
                                            'DDI_IPR_Sorted.xlsx')
     processed_ddi_file = os.path.join(processed_data_path, 'DDI_to_IPR.xlsx')
@@ -258,7 +256,7 @@ def main():
 
     logger.info('Performing IP Validation Check')
     # IP Validation check:
-    _ip_validation(interim_unsorted_ddi_file, validation_log_file)
+    _ip_validation(interim_sorted_ddi_file, validation_log_file)
 
     logger.info('Indexing Data')
     # Indexing for the networks listed.
