@@ -77,7 +77,9 @@ target/
 
 # exclude data from source control by default
 /data/interim/*.*
+/data/interim/Old Updates/*.*
 /data/processed/*.*
+/data/processed/Old Data/*.*
 /data/external/
 /data/raw/*.*
 
