@@ -9,7 +9,6 @@ DataSets:
 """
 import logging
 import os
-import operator
 from dotenv import find_dotenv, load_dotenv
 from xlrd import open_workbook
 from netaddr import IPNetwork
@@ -200,30 +199,6 @@ def _indexing_data(interim_file):
         master_wb.save(interim_file)
 
 
-def _sorting_data(processed_file, interim_file):
-    input_wb = open_workbook(processed_file)
-    input_sheet = input_wb.sheet_by_index(0)
-    sorting_stuff = []  # Taking Unsorted data then sorting.
-    for i in range(input_sheet.nrows):
-        if i == 0:
-            continue
-        sorting_stuff.append(input_sheet.row_values(i))
-    sorting_stuff = sorted(sorting_stuff,
-                           key=operator.itemgetter(17, 18, 19, 20, 21))
-    # Creating new spreadsheet with sorted data.
-    ddi_work_book = Workbook()
-    ddi_work_sheet = ddi_work_book.active
-    ddi_work_sheet.title = 'MASTER'
-    row = 0
-    for index, item in enumerate(HEADER_ROW):
-        ddi_work_sheet.cell(row=row + 1, column=index + 1, value=item)
-    for stuff in sorting_stuff:
-        row = row + 1
-        for index, items in enumerate(stuff):
-            ddi_work_sheet.cell(row=row + 1, column=index + 1, value=items)
-    ddi_work_book.save(interim_file)  # Renaming and Saving sorted Data.
-
-
 def _ip_validation(processed_file, log_file):
     master_wb = openpyxl.load_workbook(filename=processed_file)
     master_sheet = master_wb['MASTER']
@@ -284,10 +259,6 @@ def main():
     logger.info('Performing IP Validation Check')
     # IP Validation check:
     _ip_validation(interim_unsorted_ddi_file, validation_log_file)
-
-    logger.info('Sorting Data')
-    # Sorting data for indexing.
-    _sorting_data(interim_unsorted_ddi_file, interim_sorted_ddi_file)
 
     logger.info('Indexing Data')
     # Indexing for the networks listed.
