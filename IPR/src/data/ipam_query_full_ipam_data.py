@@ -84,7 +84,6 @@ def process_data(process_json, ea_att_sorted):
 
     Arguments:
         data_return -- Temp list used for the raw line from the API
-        DATALIST -- Global list used for appending data_return
     """
     data_return = []
     for i in process_json:
