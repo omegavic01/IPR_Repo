@@ -1,10 +1,12 @@
 """
 This script is intended to take in the DDI data generated from the
-ipam_query_app_full_report_xls.py script.  Twist, mash, and split the data.
+ipam_query_app_full_report_xls.py script.  Twist, mash, split, and sort the
+data.
 
 DataSets:
-   DDI-to-IPR-Format-Unsorted.xlsx -- output file
    ddi_workbook.xls -- input file
+   DDI_IPR_Unsorted.xlsx -- temp output file
+   DDI_IPR_Sorted.xlsx -- output file
 """
 import os
 import logging
@@ -33,16 +35,20 @@ def _sorting_data(interim_sorted_file, interim_unsorted_file):
             sorting_stuff.append(input_ws.row_values(i))
         sorting_stuff = sorted(sorting_stuff,
                                key=operator.itemgetter(17, 18, 19, 20, 21))
+
         # Creating new spreadsheet with sorted data.
-        output_ws = output_wb.create_sheet(sheet, enum)
-        output_ws.title = sheet
-        row = 0
-        for index, item in enumerate(HEADER_ROW):
-            output_ws.cell(row=row + 1, column=index + 1, value=item)
-        for stuff in sorting_stuff:
-            row = row + 1
-            for index, items in enumerate(stuff):
-                output_ws.cell(row=row + 1, column=index + 1, value=items)
+
+        def _write_final_output(sorted_stuff, sheet_name, idx):
+            output_ws = output_wb.create_sheet(sheet_name, idx)
+            output_ws.title = sheet_name
+            row = 0
+            for index, item in enumerate(HEADER_ROW):
+                output_ws.cell(row=row + 1, column=index + 1, value=item)
+            for stuff in sorted_stuff:
+                row = row + 1
+                for index, items in enumerate(stuff):
+                    output_ws.cell(row=row + 1, column=index + 1, value=items)
+        _write_final_output(sorting_stuff, sheet, enum)
     if 'Sheet' in output_wb.sheetnames:
         std = output_wb['Sheet']
         output_wb.remove(std)
@@ -122,7 +128,7 @@ def main():
         outputddilist = list of rows from spreadsheet.
     """
     # get logger
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger('ddi_to_master.py')
     logger.info('Beginning of Script')
     # Build paths and file names.
     raw_data_path = os.path.join(PROJECT_DIR, 'data', 'raw')

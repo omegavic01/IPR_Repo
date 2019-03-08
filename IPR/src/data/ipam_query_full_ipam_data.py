@@ -1,4 +1,5 @@
-"""This script is intended to pull the entire IPAM database from DDI then
+"""
+This script is intended to pull the entire IPAM database from DDI then
 generates and creates a .xls file then saving it to the path directory.
 """
 import os
@@ -12,7 +13,8 @@ requests.packages.urllib3.disable_warnings()
 
 
 def write_log(logs, path):
-    """For use when a view within IPAM does not have a network or network
+    """
+    For use when a view within IPAM does not have a network or network
     container built within the view.
     """
     with open(path, 'w') as file_log:
@@ -22,7 +24,8 @@ def write_log(logs, path):
 
 
 def wr_output_xls(ddi_data, path):
-    """URLS used to assist in coding with the xlwt module
+    """
+    URLS used to assist in coding with the xlwt module
 
     URLS:
     https://www.blog.pythonlibrary.org/2014/03/24/
@@ -62,7 +65,8 @@ def wr_output_xls(ddi_data, path):
 
 
 def ref(_ref):
-    """Takes the _ref dict and performs multiple splits to then return the
+    """
+    Takes the _ref dict and performs multiple splits to then return the
     network and the cidr.
     Example Input:
     'networkcontainer/ZG5zLm5ldHdvcmtfY29udGFpbmVyJDEwMC42NC4wLjAvMTAvMzYy:
@@ -79,7 +83,8 @@ def ref(_ref):
 
 
 def process_data(process_json, ea_att_sorted):
-    """Takes in the raw data from the API calls and splits via ref function
+    """
+    Takes in the raw data from the API calls and splits via ref function
     and appends to a temporary list that then appends to the master list.
 
     Arguments:
@@ -115,7 +120,8 @@ def process_data(process_json, ea_att_sorted):
 
 
 def api_call_network_views(view):
-    """DDI api call for networks within the 'view' value .  Returns the utf-8
+    """
+    DDI api call for networks within the 'view' value .  Returns the utf-8
     decoded with a json load.
 
         Return Variables:
@@ -146,7 +152,8 @@ def api_call_network_views(view):
 
 
 def api_call_networkcontainer_views(view):
-    """DDI api call for network containers within the 'view' value.  Returns
+    """
+    DDI api call for network containers within the 'view' value.  Returns
     the utf-8 decoded with a json load.
 
         Return Variables:
@@ -177,7 +184,8 @@ def api_call_networkcontainer_views(view):
 
 
 def get_ddi_ip_data(ddi_ea_att_sorted, title_list, net_views):
-    """Takes in the following arguments and queries IPAM for each network view.
+    """
+    Takes in the following arguments and queries IPAM for each network view.
 
         Return Variable:
         -- loggedviews - for any network views that had no data
@@ -205,7 +213,8 @@ def get_ddi_ip_data(ddi_ea_att_sorted, title_list, net_views):
 
 
 def get_views():
-    """Queries DDI for the network views and then extracts the data.
+    """
+    Queries DDI for the network views and then extracts the data.
 
         Return Variable:
         -- views - List of network views
@@ -226,7 +235,8 @@ def get_views():
 
 
 def get_ea_attributes():
-    """Queries DDI for the Extensible Attributes and then extracts the data.
+    """
+    Queries DDI for the Extensible Attributes and then extracts the data.
     Also the first attempt at connecting to IPAM.  Built in some error
     checking to report on status of connectivity.
 
@@ -258,11 +268,12 @@ def get_ea_attributes():
 
 
 def main(project_dir):
-    """Controller for the raw data pulls needed to acquire the entire IPAM
+    """
+    Controller for the raw data pulls needed to acquire the entire IPAM
     DDI IPAM Database.
     """
     # get logger
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger('ipam_query_full_ipam_data.py')
     logger.info('Beginning of Script')
     raw_data_path = os.path.join(project_dir, 'data', 'raw')
     ddi_data_path = os.path.join(raw_data_path, 'ddi_workbook.xls')
