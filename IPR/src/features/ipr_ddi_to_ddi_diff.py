@@ -21,7 +21,7 @@ def _write_output_to_master(diff_list, output_file):
 def main():
     """Script that takes in two .xlsx files in IPR format.  Performs a diff
     against them and generates an output .xlsx file."""
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger('ipr_ddi_to_ddi_diff.py')
     logger.info('Beginning of Script')
     logger.info('Building Paths and Filenames')
     # Build path's.
@@ -30,16 +30,16 @@ def main():
 
     # Join file names to path's.
     ipr_src_file = os.path.join(interim_data_path,
-                                'MASTER - Report by percent - 03012019-mod.xlsx')
+                                'DDI_to_IPR.xlsx')
     ipr_src_mod_file = os.path.join(interim_data_path,
-                                    'MASTER - Report by percent - 03012019-mod-2(03-06) .xlsx')
+                                    'MASTER - Report by percent-2019-03-08 Mod.xlsx')
     output_file = os.path.join(processed_data_path,
                                'Potential Updates for DDI.xlsx')
 
     logger.info('Loading Data')
     # Original Dataset
     ipr = open_workbook(ipr_src_file)
-    ipr_sheet = ipr.sheet_by_index(1)
+    ipr_sheet = ipr.sheet_by_index(0)
     # Modified Dataset
     ipr_mod = open_workbook(ipr_src_mod_file)
     ipr_mod_sheet = ipr_mod.sheet_by_index(1)
@@ -66,7 +66,9 @@ def main():
         if ipr_mod_row not in ipr_data:
             updatelist.append(ipr_mod_row)
             continue
+    logger.info('Writing output.')
     _write_output_to_master(updatelist, output_file)
+    logger.info('Script Complete')
 
 
 if __name__ == '__main__':
