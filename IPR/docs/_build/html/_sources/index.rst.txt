@@ -26,18 +26,18 @@ Project Organization
     +IPR                   <- Root Directory
     +
     +-- LICENSE
-    +-- requirements.txt   <- The requirements file for reproducing the analysis environment, e.g. pip freeze
-    +-- README.md          <- Shortcut for the high level documentation in html format.  To be used as the guide for this project.
-    +-- .env               <- .env contains variables used throughout the scripts.  Listed in .gitignore
-    +-- .env_template      <- a copy of .env with default variables listed.  Convert to .env file if needed.
+    +-- requirements.txt   <- The requirements file for reproducing the
+    +--                         analysis environment.
+    +-- README.md          <- README
+    +-- .env               <- .env contains variables used throughout the
+    +--                         scripts.  Listed in .gitignore
+    +-- .env_template      <- a copy of .env with default variables listed.
+    +--                         Convert to .env file if needed.
     +-- .gitignore         <- files not tracked by Git.
     +-- data
-    +   +-- external       <- (Unused)
     +   +-- interim        <- When data is in the middle of being transformed.
     +   +-- processed      <- Final location of finished products
     +   +-- raw            <- Used for raw data gathered or used in scripts
-    +
-    +-- docs               <- Path to index.html.
     +
     +-- src                <- Source code for use in this project.
     +   +-- __init__.py    <- Makes src a Python module
@@ -46,8 +46,11 @@ Project Organization
     +   +   +-- ipam_query_full_ipam_data.py
     +   +   +-- ddi_to_master.py
     +   +   +-- master_audit.py
-    +   +-- features       <- Scripts that generate reports
+    +   +
+    +   +-- features       <- Scripts that perform IPR specific tasks.
     +   +   +-- ipr_report_percent.py
+    +   +   +-- ipr_ddi_to_ddi_diff.py
+    +   +   +-- ipr_diff_to_ddi_import.py
 
 --------------
 
@@ -56,10 +59,8 @@ Request and Compile DDI Data and Generate IPR Requested Output
 
 By following the below listed python scripts you will be following the
 step by step process that is currently in use by the IPR Team. To both
-request and compile the IB DDI IPAM data into a format as requested by
-IPR. The final output being DDI_to_IPR.xlsx. Future development of
-scripts and documentation for creating import sheets for IB based off of
-changes to DDI_to_IPR.xlsx has been road mapped.
+request and compile the IB IPAM data into a format as requested by IPR.
+The final output being DDI_to_IPR.xlsx.
 
 ipam_query_app_full_report_xls.py
 ---------------------------------
@@ -69,38 +70,35 @@ ipam_query_app_full_report_xls.py
 Summary: This is the initial script used to query IB’s DDI solution (AKA
 DDI).
 
-From here this queries DDI for all of the Network Views within DDI. It
-uses this list to then query for all of the networks and
-networkcontainers defined within each Network View. Once it runs through
-the list of Network Views it then generates the output file listed
-above.
+Script queries DDI for all of the Network Views within DDI. It uses this
+list to then query for all of the networks and networkcontainers defined
+within each Network View. Once it runs through the list of Network Views
+it then generates the output file.
 
 ddi_to_master.py
 ----------------
 
 -  Input File: ddi_workbook.xls
--  Output File: DDI_IPR_Unsorted.xlsx
+-  Temp File: DDI_IPR_Unsorted.xlsx
+-  Output File: DDI_IPR_Sorted.xlsx
 
 Summary: This is the script that takes in the ddi data previously
-received. It then converts, mashes, and separates the ddi data and
-generates the output file listed above.
+received. It then converts, mashes, separates, and sorts the ddi data
+and generates the output file.
 
 master_audit.py
 ---------------
 
--  Input File: DDI_IPR_Unsorted.xlsx
 -  Interim File: DDI_IPR_Sorted.xlsx
 -  Output File: DDI-to-IPR.xlsx
 
-Summary: This script will sort all of the Networks listed within the
-input file. From here it will perform a validation check which contains
-a list of filters based on IPR’s needs. Once the validation check is
-passed it then moves into an index function. There is a unique index
-number assigned to each network listed within the input file. At which
-point it performs a conflict check as well as an overlap check. The
-index numbers are then used as a tag for when a conflict or an overlap
-occurs and updated in the appropriate cell. This is the final output for
-IPR.
+Summary: Script performs a validation check which contains a ip address
+check in order to ensure clean network addresses. Once the validation
+check is passed it then moves into an index function. There is a unique
+index number assigned to each network. At which point it performs a
+conflict check as well as an overlap check. The index numbers are then
+used as a tag for when a conflict or an overlap occurs and then written
+out to the appropriate cell. This is the final output for IPR.
 
 Features
 ========
@@ -116,7 +114,36 @@ Summary: Very simple script that takes an input file and a template
 file. Add’s the data from the Input file to the second sheet of the
 template file. Then saves the update .xlsx file as the output file.
 
-Indices and tables
+ipr_ddi_to_ddi_diff.py
+----------------------
+
+-  Input File: Source IPR File
+-  Input File: Modified Source IPR File
+-  Output File: Potential Updates for DDI.xlsx
+
+Summary: Script performs a line by line diff between both Input files.
+File names must be updated within the script and downloaded into the
+appropriate directory.
+
+ipr_diff_to_ddi_import.py
+-------------------------
+
+-  Input File: Potential Updates for DDI.xlsx
+-  Output File: Merge Import.csv
+-  Output File: Override Import.csv
+-  Output File: Override to Delete Cells Import.csv
+
+Summary: For the first run of this script you will want to update the
+(True False) ddi_api_call value to True. This will take the network
+views from the input file and query DDI for its data. Once done, update
+the ddi_api_call to false. Then run the script again. The script will
+then perform a diff between the raw data and the input file. If there
+are cells within a row that is different from what has been listed from
+the raw data file. It’ll be stored for the output file based on the
+matching import criteria. Please refer to the manual for csv imports if
+you have questions on why you would need to do a merge versus an
+override.
+
 ==================
 
 -  genindex
