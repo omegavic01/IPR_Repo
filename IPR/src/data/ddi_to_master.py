@@ -1,12 +1,16 @@
-"""This script is intended to take in the DDI data generated from the
-ipam_query_app_full_report_xls.py script.  Twist, mash, and split the data.
+"""
+This script is intended to take in the DDI data generated from the
+ipam_query_app_full_report_xls.py script.  Twist, mash, split, and sort the
+data.
 
 DataSets:
-   DDI-to-IPR-Format-Unsorted.xlsx -- output file
    ddi_workbook.xls -- input file
+   DDI_IPR_Unsorted.xlsx -- temp output file
+   DDI_IPR_Sorted.xlsx -- output file
 """
 import os
 import logging
+import operator
 from xlrd import open_workbook
 from ipaddr import IPv4Network
 from openpyxl import Workbook
@@ -14,11 +18,49 @@ from openpyxl.styles import Alignment
 from dotenv import find_dotenv, load_dotenv
 
 
+def _sorting_data(interim_sorted_file, interim_unsorted_file):
+    """
+    Takes in the converted data from sort's all of the networks within
+    each sheet within the work book.
+    """
+    input_wb = open_workbook(interim_unsorted_file)
+    sheet_names = input_wb.sheet_names()
+    output_wb = Workbook()
+    for enum, sheet in enumerate(sheet_names):
+        input_ws = input_wb.sheet_by_name(sheet)
+        sorting_stuff = []  # Taking Unsorted data then sorting.
+        for i in range(input_ws.nrows):
+            if i == 0:
+                continue
+            sorting_stuff.append(input_ws.row_values(i))
+        sorting_stuff = sorted(sorting_stuff,
+                               key=operator.itemgetter(17, 18, 19, 20, 21))
+
+        # Creating new spreadsheet with sorted data.
+
+        def _write_final_output(sorted_stuff, sheet_name, idx):
+            output_ws = output_wb.create_sheet(sheet_name, idx)
+            output_ws.title = sheet_name
+            row = 0
+            for index, item in enumerate(HEADER_ROW):
+                output_ws.cell(row=row + 1, column=index + 1, value=item)
+            for stuff in sorted_stuff:
+                row = row + 1
+                for index, items in enumerate(stuff):
+                    output_ws.cell(row=row + 1, column=index + 1, value=items)
+        _write_final_output(sorting_stuff, sheet, enum)
+    if 'Sheet' in output_wb.sheetnames:
+        std = output_wb['Sheet']
+        output_wb.remove(std)
+    output_wb.save(interim_sorted_file)
+
+
 def _write_output_to_master(ddi_dic, path):
-    """Write out the rows in IPR expected format.
+    """
+    Write out the rows in IPR expected format.
 
     Output Arguments:
-        output_file - DDI-to-IPR-Format-Unsorted.xlsx
+        output_file - DDI_to_IPR_Unsorted.xlsx
     """
 
     sheet_name_list = []
@@ -78,21 +120,24 @@ def _write_output_to_master(ddi_dic, path):
 
 
 def main():
-    """Takes path and opens workbook.  Takes in DDI data and filters out
+    """
+    Takes path and opens workbook.  Takes in DDI data and filters out
     unused data.  Once filtered it sends the array for writing.
 
-    Output Arguments:
-        outputddilist = list of rows from spreadsheet.
+    Output File:
+       -- DDI_IPR_Sorted.xlsx
     """
     # get logger
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger('ddi_to_master.py')
     logger.info('Beginning of Script')
     # Build paths and file names.
     raw_data_path = os.path.join(PROJECT_DIR, 'data', 'raw')
     interim_data_path = os.path.join(PROJECT_DIR, 'data', 'interim')
     ddi_file = os.path.join(raw_data_path, 'ddi_workbook.xls')
-    interim_ddi_file = os.path.join(interim_data_path,
-                                    'DDI_IPR_Unsorted.xlsx')
+    interim_unsorted_ddi_file = os.path.join(interim_data_path,
+                                             'DDI_IPR_Unsorted.xlsx')
+    interim_sorted_ddi_file = os.path.join(interim_data_path,
+                                           'DDI_IPR_Sorted.xlsx')
 
     # Opens ddi_workbook.xls
     rddi = open_workbook(ddi_file)
@@ -143,8 +188,10 @@ def main():
             ddi_dict['MASTER'].append(rddifirst_sheet.row_values(i))
 
     # Send information for processing and to write output.
-    logger.info('Writing out DDI-to-IPR-Format-Unsorted.xlsx')
-    _write_output_to_master(ddi_dict, interim_ddi_file)
+    logger.info('Building Data Set for Sorting')
+    _write_output_to_master(ddi_dict, interim_unsorted_ddi_file)
+    logger.info('Sorting Data and writing out DDI_IPR_Sorted.xlsx.')
+    _sorting_data(interim_sorted_ddi_file, interim_unsorted_ddi_file)
     logger.info('Script Complete')
 
 

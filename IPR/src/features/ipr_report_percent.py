@@ -8,6 +8,7 @@ data.  Here goes!"""
 import logging
 import os
 import openpyxl
+from openpyxl.styles import Alignment
 
 
 def copy_data_over(source, template, final):
@@ -24,13 +25,18 @@ def copy_data_over(source, template, final):
     for row in source_ws:
         for cell in row:
             template_ws[cell.coordinate].value = cell.value
+    max_row = template_ws.max_row
+    for row in template_ws.iter_rows(min_row=2, max_row=max_row,
+                                     min_col=24, max_col=25):
+        for cell in row:
+            cell.alignment = Alignment(horizontal='left')
     template_wb.save(final)
 
 
 def main():
     """Straight forward copying and pasting of data from one .xlsx file
     to another .xlsx file."""
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger('ipr_report_percent.py')
     logger.info('Beginning of Script')
     logger.info('Building Paths and Filenames')
     # Build path's.
