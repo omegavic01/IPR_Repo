@@ -500,7 +500,8 @@ def main():
             updated as needed.
     Output Files:
         -- Merge Import.csv
-        -- Overwrite Import.csv
+        -- Override Import.csv
+        -- Override to Delete Cells Import.csv
     """
     logger = logging.getLogger('ipr_diff_to_ddi_import.py')
     logger.info('Beginning of Script')

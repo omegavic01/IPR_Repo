@@ -5,7 +5,7 @@ overlaps and conflict subnets.  Using the index number as the tag for either
 overlap or conflict columns.
 
 DataSets:
-   DDI-to-IPR-Format-Unsorted.xlsx -- input file
+   DDI_to_IPR_Sorted.xlsx -- input file
    DDI-to-IPR.xlsx -- output file
 """
 import logging
@@ -288,7 +288,6 @@ def main():
 
     master_workbook.save(processed_ddi_file)
     logger.info('Script Complete')
-
 
 
 if __name__ == '__main__':

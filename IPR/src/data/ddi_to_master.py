@@ -60,7 +60,7 @@ def _write_output_to_master(ddi_dic, path):
     Write out the rows in IPR expected format.
 
     Output Arguments:
-        output_file - DDI-to-IPR-Format-Unsorted.xlsx
+        output_file - DDI_to_IPR_Unsorted.xlsx
     """
 
     sheet_name_list = []
@@ -124,8 +124,8 @@ def main():
     Takes path and opens workbook.  Takes in DDI data and filters out
     unused data.  Once filtered it sends the array for writing.
 
-    Output Arguments:
-        outputddilist = list of rows from spreadsheet.
+    Output File:
+       -- DDI_IPR_Sorted.xlsx
     """
     # get logger
     logger = logging.getLogger('ddi_to_master.py')
