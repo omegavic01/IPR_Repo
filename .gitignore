@@ -98,7 +98,7 @@ target/
 .mypy_cache/
 
 # Unused Folders
-/docs/_build
+/docs
 /models
 /notebooks
 /references
