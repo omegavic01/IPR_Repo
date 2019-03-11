@@ -506,24 +506,28 @@ def main():
     logger = logging.getLogger('ipr_diff_to_ddi_import.py')
     logger.info('Beginning of Script')
     logger.info('Building Paths and File names')
-    interim_data_path = os.path.join(PROJECT_DIR, 'data', 'interim')
+
+    # Build Directories
+    raw_data_path = os.path.join(PROJECT_DIR, 'data', 'raw')
     processed_data_path = os.path.join(PROJECT_DIR, 'data', 'processed')
+    reports_data_path = os.path.join(PROJECT_DIR, 'reports')
+
+    # Build File and File path.
     src_file = os.path.join(processed_data_path,
                             'Potential Updates for DDI.xlsx')
-    ea_data_file = os.path.join(interim_data_path, 'ea_data.pkl')
-    ddi_data_file = os.path.join(interim_data_path, 'ddi_data.pkl')
-    merge_file = os.path.join(processed_data_path, 'Merge Import.csv')
-    overwrite_file = os.path.join(processed_data_path, 'Override Import.csv')
-    delete_file = os.path.join(processed_data_path,
+    ea_data_file = os.path.join(raw_data_path, 'ea_data.pkl')
+    ddi_data_file = os.path.join(raw_data_path, 'ddi_data.pkl')
+    merge_file = os.path.join(reports_data_path, 'Merge Import.csv')
+    overwrite_file = os.path.join(reports_data_path, 'Override Import.csv')
+    delete_file = os.path.join(reports_data_path,
                                'Override to Delete Cells Import.csv')
 
     logger.info('Loading Data')
     src_wb = open_workbook(src_file)
     src_ws = src_wb.sheet_by_index(0)
-    src_n_cols = src_ws.ncols
 
     logger.info('Compiling list of views.')
-    views = _get_views(src_n_cols, src_ws)
+    views = _get_views(src_ws.ncols, src_ws)
 
     # Update to True if a fresh set of data is needed from ddi.
     ddi_api_call = False

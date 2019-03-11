@@ -21,21 +21,22 @@ Project Organization
 --------------------
 
     +IPR                   <- Root Directory
-    +
-    +-- LICENSE
-    +-- requirements.txt   <- The requirements file for reproducing the
-    +--                         analysis environment.
-    +-- README.md          <- README
-    +-- .env               <- .env contains variables used throughout the
-    +--                         scripts.  Listed in .gitignore
-    +-- .env_template      <- a copy of .env with default variables listed.
-    +--                         Convert to .env file if needed.
-    +-- .gitignore         <- files not tracked by Git.
+    -
+    --- LICENSE
+    --- requirements.txt   <- The requirements file for reproducing the
+    ---                         analysis environment.
+    --- README.md          <- README
+    --- .env               <- .env contains variables used throughout the
+    ---                         scripts.  Listed in .gitignore
+    --- .env_template      <- a copy of .env with default variables listed.
+    ---                         Convert to .env file if needed.
+    --- .gitignore         <- files not tracked by Git.
+    +-- reports            <- Dir for reports generated for public use.
     +-- data
     +   +-- interim        <- When data is in the middle of being transformed.
-    +   +-- processed      <- Final location of finished products
-    +   +-- raw            <- Used for raw data gathered or used in scripts
-    +
+    +   +-- processed      <- Final location of finished data transformations.
+    +   +-- raw            <- Used for raw data gathered or used in scripts.
+    -
     +-- src                <- Source code for use in this project.
     +   +-- __init__.py    <- Makes src a Python module
     +   +
@@ -43,7 +44,7 @@ Project Organization
     +   +   +-- ipam_query_full_ipam_data.py
     +   +   +-- ddi_to_master.py
     +   +   +-- master_audit.py
-    +   +
+    +   -
     +   +-- features       <- Scripts that perform IPR specific tasks.
     +   +   +-- ipr_report_percent.py
     +   +   +-- ipr_ddi_to_ddi_diff.py

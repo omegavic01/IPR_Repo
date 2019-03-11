@@ -41,13 +41,13 @@ def main():
     logger.info('Building Paths and Filenames')
     # Build path's.
     interim_data_path = os.path.join(PROJECT_DIR, 'data', 'interim')
-    processed_data_path = os.path.join(PROJECT_DIR, 'data', 'processed')
+    reports_data_path = os.path.join(PROJECT_DIR, 'reports')
 
     # Join file names to path's.
-    source_file = os.path.join(processed_data_path, 'DDI_to_IPR.xlsx')
+    source_file = os.path.join(reports_data_path, 'DDI_to_IPR.xlsx')
     mtr_prcnt_tmplt = os.path.join(interim_data_path,
                                    'MASTER - Report by percent template.xlsx')
-    mtr_prcnt_file = os.path.join(processed_data_path,
+    mtr_prcnt_file = os.path.join(reports_data_path,
                                   'MASTER - Report by percent.xlsx')
 
     logger.info('Writing Data Over')

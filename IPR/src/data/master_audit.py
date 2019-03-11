@@ -248,15 +248,15 @@ def main():
     logger = logging.getLogger('master_audit.py')
     logger.info('Beginning of Script')
     # Build path's.
-    interim_data_path = os.path.join(PROJECT_DIR, 'data', 'interim')
     processed_data_path = os.path.join(PROJECT_DIR, 'data', 'processed')
-    log_data_path = os.path.join(PROJECT_DIR, 'data', 'processed')
+    reports_data_path = os.path.join(PROJECT_DIR, 'reports')
 
     # Join file names to path's.
-    interim_sorted_ddi_file = os.path.join(interim_data_path,
+    interim_sorted_ddi_file = os.path.join(processed_data_path,
                                            'DDI_IPR_Sorted.xlsx')
-    processed_ddi_file = os.path.join(processed_data_path, 'DDI_to_IPR.xlsx')
-    validation_log_file = os.path.join(log_data_path, 'validation_log.txt')
+    processed_ddi_file = os.path.join(reports_data_path, 'DDI_to_IPR.xlsx')
+    validation_log_file = os.path.join(processed_data_path,
+                                       'validation_log.txt')
 
     logger.info('Performing IP Validation Check')
     # IP Validation check:

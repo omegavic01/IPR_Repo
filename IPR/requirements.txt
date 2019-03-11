@@ -1,5 +1,15 @@
 # local package
 -e .
+os
+ipaddress
+time
+json
+datetime
+logging
+operator
+ipaddress
+re
+collections
 
 # external requirements
 click
@@ -11,4 +21,5 @@ python-dotenv>=0.5.1
 xlrd
 netaddr
 openpyxl
-ipaddress
+requests
+ipaddr

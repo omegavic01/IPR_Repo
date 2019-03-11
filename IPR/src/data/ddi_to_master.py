@@ -133,11 +133,12 @@ def main():
     # Build paths and file names.
     raw_data_path = os.path.join(PROJECT_DIR, 'data', 'raw')
     interim_data_path = os.path.join(PROJECT_DIR, 'data', 'interim')
+    processed_data_path = os.path.join(PROJECT_DIR, 'data', 'processed')
     ddi_file = os.path.join(raw_data_path, 'ddi_workbook.xls')
     interim_unsorted_ddi_file = os.path.join(interim_data_path,
                                              'DDI_IPR_Unsorted.xlsx')
-    interim_sorted_ddi_file = os.path.join(interim_data_path,
-                                           'DDI_IPR_Sorted.xlsx')
+    processed_sorted_ddi_file = os.path.join(processed_data_path,
+                                             'DDI_IPR_Sorted.xlsx')
 
     # Opens ddi_workbook.xls
     rddi = open_workbook(ddi_file)
@@ -191,7 +192,7 @@ def main():
     logger.info('Building Data Set for Sorting')
     _write_output_to_master(ddi_dict, interim_unsorted_ddi_file)
     logger.info('Sorting Data and writing out DDI_IPR_Sorted.xlsx.')
-    _sorting_data(interim_sorted_ddi_file, interim_unsorted_ddi_file)
+    _sorting_data(processed_sorted_ddi_file, interim_unsorted_ddi_file)
     logger.info('Script Complete')
 
 
