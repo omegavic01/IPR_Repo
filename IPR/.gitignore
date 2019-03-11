@@ -85,6 +85,7 @@ target/
 /data/processed/Old Data/*.*
 /data/external/
 /data/raw/*.*
+/data/*.*
 
 # Mac OS-specific storage files
 .DS_Store
