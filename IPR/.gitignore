@@ -77,9 +77,12 @@ target/
 
 # exclude data from source control by default
 /data/interim/*.*
+<<<<<<< HEAD
 /reports/*.*
 /reports/figures/*.*
 /data/processed/*.*
+=======
+>>>>>>> netm-branch
 /data/interim/Old Updates/*.*
 /data/processed/*.*
 /data/processed/Old Data/*.*
