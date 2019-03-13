@@ -36,23 +36,23 @@ Project Organization
     --- .gitignore         <- files not tracked by Git.
     +-- reports            <- Dir for reports generated for IPR use.
     +-- data
-    +   +-- interim        <- When data is in the middle of being transformed.
-    +   +-- processed      <- Final location of finished data transformations.
-    +   +-- raw            <- Used for raw data gathered or used in scripts.
+    +-- +-- interim        <- When data is in the middle of being transformed.
+    +-- +-- processed      <- Final location of finished data transformations.
+    +-- +-- raw            <- Used for raw data gathered or used in scripts.
     ---
     +-- src                <- Source code for use in this project.
-    +   --- __init__.py
-    +   ---
-    +   +-- data           <- Scripts to download or generate data
-    +   +   --- ipam_query_full_ipam_data.py
-    +   +   --- ddi_to_master.py
-    +   +   --- master_audit.py
+    +-- --- __init__.py
+    +-- ---
+    +-- +-- data           <- Scripts to download or generate data
+    +-- +-- --- ipam_query_full_ipam_data.py
+    +-- +-- --- ddi_to_master.py
+    +-- +-- --- master_audit.py
     --- ---
-    +   +-- features       <- Scripts that perform IPR specific tasks.
-    +   +   --- ipr_report_percent.py
-    +   +   --- ipr_clean_vrf_check.py
-    +   +   --- ipr_ddi_to_ddi_diff.py
-    +   +   --- ipr_diff_to_ddi_import.py
+    +-- +-- features       <- Scripts that perform IPR specific tasks.
+    +-- +-- --- ipr_report_percent.py
+    +-- +-- --- ipr_clean_vrf_check.py
+    +-- +-- --- ipr_ddi_to_ddi_diff.py
+    +-- +-- --- ipr_diff_to_ddi_import.py
 * * * * *
 
 Request and Compile DDI Data and Generate IPR Requested Output

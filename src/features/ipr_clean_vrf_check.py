@@ -158,7 +158,7 @@ def main():
 
     # Join file names to path's.
     source_file = os.path.join(processed_data_path, 'ddi_to_ipr.pkl')
-    master_file = os.path.join(reports_data_path, 'DDI_to_IPR - Copy.xlsx')
+    master_file = os.path.join(reports_data_path, 'DDI_to_IPR.xlsx')
 
     logger.info('Loading Pickled Data')
     ipr_data = _load_pickle_data(source_file, logger)
