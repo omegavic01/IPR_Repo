@@ -16,6 +16,7 @@ from xlrd import open_workbook
 from netaddr import IPNetwork
 import openpyxl
 from openpyxl.styles import Alignment
+import pickle
 from checks.master_audit_validation_check import validation_check
 
 
@@ -73,6 +74,16 @@ def _wr_out_validation_check(master_sh, master_cidr_data, log_file):
     if changes:
         return 'Changes'
     return 'Unclean'
+
+
+def _pickle_data(master_ws, file):
+    pickle_list = []
+    for row in master_ws:
+        templist = []
+        for cell in row:
+            templist.append(cell.value)
+        pickle_list.append(templist)
+    pickle.dump(pickle_list, open(file, 'wb'))
 
 
 def _wr_out_overlap_conflict_tag(master_ws):
@@ -254,7 +265,8 @@ def main():
     # Join file names to path's.
     interim_sorted_ddi_file = os.path.join(processed_data_path,
                                            'DDI_IPR_Sorted.xlsx')
-    processed_ddi_file = os.path.join(reports_data_path, 'DDI_to_IPR.xlsx')
+    report_ddi_file = os.path.join(reports_data_path, 'DDI_to_IPR.xlsx')
+    pickle_ddi_file = os.path.join(processed_data_path, 'ddi_to_ipr.pkl')
     validation_log_file = os.path.join(processed_data_path,
                                        'validation_log.txt')
 
@@ -286,7 +298,11 @@ def main():
     # Write in overlap and conflict tags.
     _wr_out_overlap_conflict_tag(master_worksheet)
 
-    master_workbook.save(processed_ddi_file)
+    # Pickle data for future uses.
+    _pickle_data(master_worksheet, pickle_ddi_file)
+
+    # Save workbook.
+    master_workbook.save(report_ddi_file)
     logger.info('Script Complete')
 
 
