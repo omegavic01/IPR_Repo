@@ -1,6 +1,6 @@
 """
 This script is intended to take in the DDI data generated from the
-ipam_query_app_full_report_xls.py script.  Twist, mash, split, and sort the
+ipr_initial_data_gathering.py script.  Twist, mash, split, and sort the
 data.
 
 DataSets:
@@ -59,7 +59,7 @@ def _write_output_to_master(ddi_dic, path):
     """
     Write out the rows in IPR expected format.
 
-    Output Arguments:
+    Output File:
         output_file - DDI_to_IPR_Unsorted.xlsx
     """
 

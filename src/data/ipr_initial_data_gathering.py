@@ -3,6 +3,7 @@ This script is intended to pull the entire IPAM database from DDI then
 generates and creates a .xls file then saving it to the path directory.
 """
 import os
+import sys
 import time
 import json
 from datetime import datetime
@@ -23,7 +24,7 @@ def write_log(logs, path):
             file_log.write('\n')
 
 
-def wr_output_xls(ddi_data, path):
+def wr_output_xls(ddi_data, path, logger):
     """
     URLS used to assist in coding with the xlwt module
 
@@ -55,12 +56,12 @@ def wr_output_xls(ddi_data, path):
             row = wrk_sheet.row(row_number)
     try:
         wrk_book.save(path)
-        print('Created ddi_workbook.xls in the following directory: ', path)
+        logger.info('Created ddi_workbook.xls')
     except OSError as fileerr:
         filename1 = 'ddi_workbook_' + datetime.now().strftime("%Y%m%d-%H%M%S")\
                     + '.xls'
-        print('Typically due to a permissions issue! '
-              'Renaming file to '+filename1, fileerr)
+        logger.warning('Typically due to a permissions issue!')
+        logger.warning('Renaming file to %s, %s', filename1, fileerr)
         wrk_book.save(path)
 
 
@@ -119,13 +120,13 @@ def process_data(process_json, ea_att_sorted):
     return data_return
 
 
-def api_call_network_views(view):
+def api_call_network_views(view, logger):
     """
     DDI api call for networks within the 'view' value .  Returns the utf-8
     decoded with a json load.
 
         Return Variables:
-        -- none
+        -- rddijsonnet
     """
     trynetwork = 3
     rnet = None
@@ -141,23 +142,23 @@ def api_call_network_views(view):
             break
         except requests.exceptions.ConnectionError as nerrt:
             if iview < trynetwork - 1:
-                print('Network View retry# ' + view, iview)
+                logger.warning('Network View Retry# %s, %s', view, iview)
                 time.sleep(5)
                 continue
             else:
-                print('Timeout Error for container view: ' + view, ' ',
-                      iview, nerrt)
+                logger.warning('Timeout Error for container view: %s, %s, %s',
+                               view, iview, nerrt)
                 return []
     return json.loads(rnet.content.decode('utf-8'))
 
 
-def api_call_networkcontainer_views(view):
+def api_call_networkcontainer_views(view, logger):
     """
     DDI api call for network containers within the 'view' value.  Returns
     the utf-8 decoded with a json load.
 
         Return Variables:
-        -- none
+        -- rddijsonnetcont
     """
     trynetworkview = 3
     rnetcont = None
@@ -173,29 +174,29 @@ def api_call_networkcontainer_views(view):
             break
         except requests.exceptions.ConnectionError as cerrt:
             if inview < trynetworkview - 1:
-                print('Container View retry# ' + view, inview)
+                logger.warning('Container View Retry # %s, %s', view, inview)
                 time.sleep(5)
                 continue
             else:
-                print('Timeout Error for container view: ' + view, ' ',
-                      inview, cerrt)
+                logger.warning('Timeout Error for container view: %s, %s, %s',
+                               view, inview, cerrt)
                 return []
     return json.loads(rnetcont.content.decode('utf-8'))
 
 
-def get_ddi_ip_data(ddi_ea_att_sorted, title_list, net_views):
+def get_ddi_ip_data(ddi_ea_att_sorted, title_list, net_views, logger):
     """
     Takes in the following arguments and queries IPAM for each network view.
 
         Return Variable:
-        -- loggedviews - for any network views that had no data
+        -- loggedviews - for any network views that have no data
     """
     temp_list = [title_list]
     logged_views = []
     for view in net_views:
-        print(view)
-        rddijsonnet = api_call_network_views(view)
-        rddijsonnetcont = api_call_networkcontainer_views(view)
+        logger.info('Pulling information for View: %s', view)
+        rddijsonnet = api_call_network_views(view, logger)
+        rddijsonnetcont = api_call_networkcontainer_views(view, logger)
         if isinstance(rddijsonnet, dict) and isinstance(rddijsonnetcont,
                                                         dict):
             continue
@@ -207,7 +208,7 @@ def get_ddi_ip_data(ddi_ea_att_sorted, title_list, net_views):
         elif rddijsonnetcont:
             temp_list.append(process_data(rddijsonnetcont, ddi_ea_att_sorted))
         else:
-            print(view + " Has no Network or Network Containers")
+            logger.info('%s: Has no Network or Network Containers.', view)
             logged_views.append(view)
     return temp_list, logged_views
 
@@ -230,7 +231,7 @@ def get_views():
         for key in raw_view.keys():
             if key == 'name':
                 views.append(raw_view[key])
-    # views = ['UNO']  # Instead of pulling all views.
+    views = ['UNO']  # Instead of pulling all views.
     return views
 
 
@@ -273,7 +274,7 @@ def main(project_dir):
     DDI IPAM Database.
     """
     # get logger
-    logger = logging.getLogger('ipam_query_full_ipam_data.py')
+    logger = logging.getLogger('ipr_initial_data_gathering.py')
     logger.info('Beginning of Script')
     raw_data_path = os.path.join(project_dir, 'data', 'raw')
     ddi_data_path = os.path.join(raw_data_path, 'ddi_workbook.xls')
@@ -297,12 +298,13 @@ def main(project_dir):
     logger.info('Pulling DDI Data: Beginning')
     data_list, loggs = get_ddi_ip_data(ddi_ea_attr_sorted,
                                        title_list,
-                                       net_views)
+                                       net_views,
+                                       logger)
     logger.info('Pulling DDI Data: Completed')
 
     # Writes output to an xls file.
     logger.info('Writing Data: Beginning')
-    wr_output_xls(data_list, ddi_data_path)
+    wr_output_xls(data_list, ddi_data_path, logger)
     logger.info('Writing Data: Completed')
 
     # Takes any logs received during the get_ddi_ip_data function and writes.

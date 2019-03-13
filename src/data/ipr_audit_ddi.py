@@ -1,5 +1,5 @@
 """
-This script takes in the ddi data converted to IPR format.  It then performs
+This script takes the output from ipr_format_ddi.py.  It then performs
 a validation check.  Once validation check passes it indexes and searches for
 overlaps and conflict subnets.  Using the index number as the tag for either
 overlap or conflict columns.
@@ -256,7 +256,7 @@ def main():
     if IPNetwork("10.11.12.0/24") in IPNetwork("10.11.0.0/16"):
         print "Yes it is!"
     """
-    logger = logging.getLogger('master_audit.py')
+    logger = logging.getLogger('ipr_audit_ddi.py')
     logger.info('Beginning of Script')
     # Build path's.
     processed_data_path = os.path.join(PROJECT_DIR, 'data', 'processed')

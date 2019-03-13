@@ -44,9 +44,10 @@ Project Organization
     +-- --- __init__.py
     +-- ---
     +-- +-- data           <- Scripts to download or generate data
-    +-- +-- --- ipam_query_full_ipam_data.py
-    +-- +-- --- ddi_to_master.py
-    +-- +-- --- master_audit.py
+    +-- +-- --- ipr_main_script.py
+    +-- +-- --- ipr_initial_data_gathering.py
+    +-- +-- --- ipr_format_ddi.py
+    +-- +-- --- ipr_audit_ddi.py
     --- ---
     +-- +-- features       <- Scripts that perform IPR specific tasks.
     +-- +-- --- ipr_report_percent.py
@@ -63,7 +64,14 @@ step by step process that is currently in use by the IPR Team. To both
 request and compile the IB IPAM data into a format as required by IPR. The
 final output being DDI\_to\_IPR.xlsx.
 
-ipam\_query\_app\_full\_report\_xls.py
+ipr\_main\_script.py
+--------------------------------------
+
+Summary: This script houses the five scripts used to create the IPR formatted
+data from the IP database.  The request was to have one script that runs the
+scripts needed to create the data thereby removing the manual process.
+
+ipr\_initial\_data\_gathering.py
 --------------------------------------
 
 -   Output File: ddi\_workbook.xls
@@ -76,7 +84,7 @@ to then query all of the networks and networkcontainers defined within each
 Network View. Once it runs through the list of Network Views it then generates
 the output file.
 
-ddi\_to\_master.py
+ipr\_format\_ddi.py
 ------------------
 
 -   Input File: ddi\_workbook.xls
@@ -87,7 +95,7 @@ Summary: This is the script that takes in the ddi data previously
 received. It then converts, mashes, separates, and sorts the ddi data and
 generates the output file.
 
-master\_audit.py
+ipr\audit\_ddi.py
 ----------------
 
 -   Interim File: DDI\_IPR\_Sorted.xlsx
@@ -108,7 +116,7 @@ ipr_report_percent.py
 ---------------------
 
 -   Input File: DDI\_to\_IPR.xlsx
--   Template File: MASTER \- Report by percent template.xlsx
+-   Template File: MASTER \- Report by percent template.xlsx (IPR has template)
 -   Output File: MASTER \- Report by percent.xlsx
 
 Summary:  Very simple script that takes an input file and a template file.
