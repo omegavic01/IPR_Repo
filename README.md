@@ -22,7 +22,7 @@ Project Organization
 --------------------
 
     +IPR                   <- Root Directory
-    -
+    ---
     --- LICENSE
     --- requirements.txt   <- The python packages used for reproducing the
     ---                         analysis environment.
@@ -39,15 +39,15 @@ Project Organization
     +   +-- interim        <- When data is in the middle of being transformed.
     +   +-- processed      <- Final location of finished data transformations.
     +   +-- raw            <- Used for raw data gathered or used in scripts.
-    -
+    ---
     +-- src                <- Source code for use in this project.
     +   --- __init__.py
-    +   -
+    +   ---
     +   +-- data           <- Scripts to download or generate data
     +   +   --- ipam_query_full_ipam_data.py
     +   +   --- ddi_to_master.py
     +   +   --- master_audit.py
-    -
+    --- ---
     +   +-- features       <- Scripts that perform IPR specific tasks.
     +   +   --- ipr_report_percent.py
     +   +   --- ipr_clean_vrf_check.py
@@ -154,10 +154,3 @@ has been listed from the raw data file.  It'll be stored for the output file
 based on the matching import criteria.  Please refer to the manual for csv
 imports if you have questions on why you would need to do a merge versus an
 override.
-
-==================
-
--   genindex
--   modindex
--   search
-
