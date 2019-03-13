@@ -1,9 +1,17 @@
+"""
+Script used to call the five scripts needed to generate the reports requested
+by IPR.
+"""
 import logging
 import os
 import sys
 
 
 def main():
+    """
+    Main Wrapper function that builds the path and has the filenames listed.
+    Then to execute the scripts one by one.
+    """
     logger = logging.getLogger(sys.argv[0].split('/')[-1])
     logger.info('Beginning of Script')
     # Build path's.
