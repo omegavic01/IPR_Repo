@@ -288,6 +288,10 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
             temp_dict_overwrite.update({'comment': src_row[12].strip()})
         # EA check
         for key, value in ea_index.items():
+            if '\n' in src_row[value]:
+                src_row[value] = src_row[value].replace('\n', ', ')
+            if ', ,' in src_row[value]:
+                src_row[value] = src_row[value].replace(', ,', ', ')
             if key not in ddi['extattrs'].keys() and \
                     src_row[value].strip() == '':
                 continue
@@ -349,7 +353,7 @@ def main_phase_one(views, src_ws, ea_path, ddi_path):
     return _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data)
 
 
-def api_call_network_views(view):
+def api_call_network_views(view, logger):
     """DDI api call for networks within the 'view' value .  Returns the utf-8
     decoded with a json load.
 
@@ -370,17 +374,17 @@ def api_call_network_views(view):
             break
         except requests.exceptions.ConnectionError as nerrt:
             if iview < trynetwork - 1:
-                print('Network View retry# ' + view, iview)
+                logger.warning('Container View Retry #%s ,$%s', view, iview)
                 time.sleep(5)
                 continue
             else:
-                print('Timeout Error for container view: ' + view, ' ',
-                      iview, nerrt)
+                logger.info('Timeout Error for container view: %s, %s, %s',
+                            view, iview, nerrt)
                 return []
     return json.loads(rnet.content.decode('utf-8'))
 
 
-def api_call_networkcontainer_views(view):
+def api_call_networkcontainer_views(view, logger):
     """DDI api call for network containers within the 'view' value.  Returns
     the utf-8 decoded with a json load.
 
@@ -401,17 +405,17 @@ def api_call_networkcontainer_views(view):
             break
         except requests.exceptions.ConnectionError as cerrt:
             if inview < trynetworkview - 1:
-                print('Container View retry# ' + view, inview)
+                logger.warning('Container View Retry #%s ,$%s', view, inview)
                 time.sleep(5)
                 continue
             else:
-                print('Timeout Error for container view: ' + view, ' ',
-                      inview, cerrt)
+                logger.info('Timeout Error for container view: %s, %s, %s',
+                            view, inview, cerrt)
                 return []
     return json.loads(rnetcont.content.decode('utf-8'))
 
 
-def get_ea_attributes(path):
+def get_ea_attributes(path, logger):
     """Queries DDI for the Extensible Attributes and then extracts the data.
     Also the first attempt at connecting to IPAM.  Built in some error
     checking to report on status of connectivity.
@@ -427,10 +431,11 @@ def get_ea_attributes(path):
                                 verify=False)
         reattrib.raise_for_status()
     except requests.exceptions.ConnectionError as eaerrt:
-        print("Can't reach IPAM!  Check your VPN or Local access", eaerrt)
+        logger.error("Can't reach IPAM! Check your VPN or Local Access, %s",
+                     eaerrt)
         exit()
     except requests.exceptions.HTTPError as eahrrt:
-        print('Check your credentials!', eahrrt)
+        logger.error("Check your credentials! %s", eahrrt)
         exit()
 
     rutfeattrib = reattrib.content.decode('utf-8')
@@ -451,14 +456,14 @@ def get_ddi_ip_data(net_views, ea_path, ddi_path, logger):
         ddi_data.pkl
     """
     # Pull down fresh copy of ea-att's
-    get_ea_attributes(ea_path)
+    get_ea_attributes(ea_path, logger)
 
     # Pull down fresh copy of view data
     ddi_data = []
     for view in net_views:
-        print(view)
-        ddijsonnet = api_call_network_views(view)
-        ddijsonnetcont = api_call_networkcontainer_views(view)
+        logger.info("Getting data for view: %s", view)
+        ddijsonnet = api_call_network_views(view, logger)
+        ddijsonnetcont = api_call_networkcontainer_views(view, logger)
         if isinstance(ddijsonnet, dict) and isinstance(ddijsonnetcont, dict):
             continue
         if ddijsonnet and ddijsonnetcont:
@@ -514,7 +519,7 @@ def main():
 
     # Build File and File path.
     src_file = os.path.join(processed_data_path,
-                            'Potential Updates for DDI.xlsx')
+                            'Final_DDI-IPR-DivDD-3.13.19.xlsx')
     ea_data_file = os.path.join(raw_data_path, 'ea_data.pkl')
     ddi_data_file = os.path.join(raw_data_path, 'ddi_data.pkl')
     merge_file = os.path.join(reports_data_path, 'Merge Import.csv')
@@ -542,7 +547,7 @@ def main():
                                               ddi_data_file)
 
     # Send data off to be written.
-    logger.info('Writing Data.  Please refer to the processed dir within data')
+    logger.info('Writing Data.  Please refer to the reports dir.')
     _write_output_for_merge_csv(merge, merge_file)
     _write_output_for_overwrite_csv(overwrite, overwrite_file)
     _write_output_for_delete_csv(delete, delete_file)
