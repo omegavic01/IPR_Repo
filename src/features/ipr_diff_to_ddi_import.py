@@ -28,7 +28,7 @@ def cidr_to_netmask(cidr):
 
 def _write_output_for_merge_csv(data, file):
     """
-    This function writes out a .csv file.
+    This function writes out a .csv file for an import type: merge.
     """
     with open(file, 'w', encoding='utf-8', newline='') as csvfile:
         file_write = csv.writer(csvfile, delimiter='\t')
@@ -85,9 +85,37 @@ def _write_output_for_merge_csv(data, file):
                                              stuff[3][item]])
 
 
+def _write_output_for_delete_csv(data, file):
+    """
+    This function writes out a .csv file for an import type: delete.
+    """
+    with open(file, 'w', encoding='utf-8', newline='') as csvfile:
+        file_write = csv.writer(csvfile, delimiter='\t')
+        for stuff in data:
+            if 'network' in stuff:
+                file_write.writerow(['header-network',
+                                     'address*',
+                                     'netmask*',
+                                     'network_view'])
+                file_write.writerow([stuff[2],
+                                     stuff[1].split('/')[0],
+                                     cidr_to_netmask(stuff[1].
+                                                     split('/')[1]),
+                                     stuff[0]])
+            if 'networkcontainer' in stuff:
+                file_write.writerow(['header-networkcontainer',
+                                     'address*',
+                                     'netmask*',
+                                     'network_view'])
+                file_write.writerow([stuff[2],
+                                     stuff[1].split('/')[0],
+                                     stuff[1].split('/')[1],
+                                     stuff[0]])
+
+
 def _write_output_for_override_csv(data, file):
     """
-    This function writes out a csv file.
+    This function writes out a csv file for an import type: override.
     """
     with open(file, 'w', encoding='utf-8', newline='') as csvfile:
         file_write = csv.writer(csvfile, delimiter='\t')
@@ -146,7 +174,7 @@ def _write_output_for_override_csv(data, file):
 
 def _write_output_for_override_blanks_csv(data, file):
     """
-    This function writes out a csv file.
+    This function writes out a csv file for an import type: override.
     """
     with open(file, 'w', encoding='utf-8', newline='') as csvfile:
         file_write = csv.writer(csvfile, delimiter='\t')
@@ -264,8 +292,9 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
                                 process.
     """
     import_merge = []
-    import_overwrite = []
     import_delete = []
+    import_override = []
+    import_override_to_blank = []
     for idx in range(src_n_rows):
         if idx == 0:
             continue
@@ -273,8 +302,13 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
         ddi = ddi_data[views_index[src_row[15]]][src_row[1].strip()]
 
         temp_dict_merge = {}
-        temp_dict_overwrite = {}
         temp_dict_delete = {}
+        temp_dict_override = {}
+        temp_dict_override_to_blank = {}
+        # Delete Check.
+        if 'del' in src_row[0].lower():
+            import_delete.append([src_row[15], src_row[1], src_row[14]])
+            continue
         # Comment check.
         if 'comment' not in ddi.keys() and src_row[12].strip() == '':
             pass
@@ -282,10 +316,11 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
             temp_dict_merge.update({'comment': src_row[12].strip()})
         elif src_row[12].strip() != ddi['comment'] and \
                 src_row[12].strip() == '':
-            temp_dict_delete.update({'comment': src_row[12].strip()})
+            temp_dict_override_to_blank.update(
+                {'comment': src_row[12].strip()})
         elif src_row[12].strip() != ddi['comment'] and \
                 src_row[12].strip() != '':
-            temp_dict_overwrite.update({'comment': src_row[12].strip()})
+            temp_dict_override.update({'comment': src_row[12].strip()})
         # EA check
         for key, value in ea_index.items():
             if '\n' in src_row[value]:
@@ -300,26 +335,27 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
                 temp_dict_merge.update({key: src_row[value]})
             elif src_row[value].strip() != ddi['extattrs'][key]['value'] and \
                     src_row[value].strip() != '':
-                temp_dict_overwrite.update({key: src_row[value]})
+                temp_dict_override.update({key: src_row[value]})
             elif src_row[value].strip() != ddi['extattrs'][key]['value'] and \
                     src_row[value].strip() == '':
-                temp_dict_delete.update({key: src_row[value]})
+                temp_dict_override_to_blank.update({key: src_row[value]})
         if temp_dict_merge:
             import_merge.append([src_row[15].strip(),
                                  src_row[1].strip(),
                                  src_row[14].strip(),
                                  temp_dict_merge])
-        if temp_dict_overwrite:
-            import_overwrite.append([src_row[15].strip(),
-                                     src_row[1].strip(),
-                                     src_row[14].strip(),
-                                     temp_dict_overwrite])
-        if temp_dict_delete:
-            import_delete.append([src_row[15].strip(),
-                                  src_row[1].strip(),
-                                  src_row[14].strip(),
-                                  temp_dict_delete])
-    return import_merge, import_overwrite, import_delete
+        if temp_dict_override:
+            import_override.append([src_row[15].strip(),
+                                    src_row[1].strip(),
+                                    src_row[14].strip(),
+                                    temp_dict_override])
+        if temp_dict_override_to_blank:
+            import_override_to_blank.append([src_row[15].strip(),
+                                             src_row[1].strip(),
+                                             src_row[14].strip(),
+                                             temp_dict_override_to_blank])
+    return import_merge, import_delete, import_override, \
+           import_override_to_blank
 
 
 def main_phase_one(views, src_ws, ea_path, ddi_path):
@@ -523,13 +559,14 @@ def main():
     ea_data_file = os.path.join(raw_data_path, 'ea_data.pkl')
     ddi_data_file = os.path.join(raw_data_path, 'ddi_data.pkl')
     merge_file = os.path.join(reports_data_path, 'Merge Import.csv')
+    delete_file = os.path.join(reports_data_path, 'Delete Import.csv')
     override_file = os.path.join(reports_data_path, 'Override Import.csv')
     override_to_blank_file = os.path.join(reports_data_path,
                                           'Override to Blank Cells Import.csv')
 
     logger.info('Loading Data')
     src_wb = open_workbook(src_file)
-    src_ws = src_wb.sheet_by_index(0)
+    src_ws = src_wb.sheet_by_index(2)
 
     logger.info('Compiling list of views.')
     views = _get_views(src_ws.ncols, src_ws)
@@ -541,17 +578,22 @@ def main():
         get_ddi_ip_data(views, ea_data_file, ddi_data_file, logger)
 
     # Building data sets for in preparation for writing.
-    merge, override, override_blanks = main_phase_one(views,
-                                                      src_ws,
-                                                      ea_data_file,
-                                                      ddi_data_file)
+    merge, delete, override, override_blanks = main_phase_one(views,
+                                                              src_ws,
+                                                              ea_data_file,
+                                                              ddi_data_file)
 
     # Send data off to be written.
     logger.info('Writing Data.  Please refer to the reports dir.')
-    _write_output_for_merge_csv(merge, merge_file)
-    _write_output_for_override_csv(override, override_file)
-    _write_output_for_override_blanks_csv(override_blanks,
-                                          override_to_blank_file)
+    if merge:
+        _write_output_for_merge_csv(merge, merge_file)
+    if delete:
+        _write_output_for_delete_csv(delete, delete_file)
+    if override:
+        _write_output_for_override_csv(override, override_file)
+    if override_blanks:
+        _write_output_for_override_blanks_csv(override_blanks,
+                                              override_to_blank_file)
 
 
 if __name__ == '__main__':
