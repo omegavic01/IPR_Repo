@@ -85,7 +85,7 @@ def _write_output_for_merge_csv(data, file):
                                              stuff[3][item]])
 
 
-def _write_output_for_overwrite_csv(data, file):
+def _write_output_for_override_csv(data, file):
     """
     This function writes out a csv file.
     """
@@ -144,7 +144,7 @@ def _write_output_for_overwrite_csv(data, file):
                                              stuff[3][item]])
 
 
-def _write_output_for_delete_csv(data, file):
+def _write_output_for_override_blanks_csv(data, file):
     """
     This function writes out a csv file.
     """
@@ -523,9 +523,9 @@ def main():
     ea_data_file = os.path.join(raw_data_path, 'ea_data.pkl')
     ddi_data_file = os.path.join(raw_data_path, 'ddi_data.pkl')
     merge_file = os.path.join(reports_data_path, 'Merge Import.csv')
-    overwrite_file = os.path.join(reports_data_path, 'Override Import.csv')
-    delete_file = os.path.join(reports_data_path,
-                               'Override to Delete Cells Import.csv')
+    override_file = os.path.join(reports_data_path, 'Override Import.csv')
+    override_to_blank_file = os.path.join(reports_data_path,
+                                          'Override to Blank Cells Import.csv')
 
     logger.info('Loading Data')
     src_wb = open_workbook(src_file)
@@ -541,16 +541,17 @@ def main():
         get_ddi_ip_data(views, ea_data_file, ddi_data_file, logger)
 
     # Building data sets for in preparation for writing.
-    merge, overwrite, delete = main_phase_one(views,
-                                              src_ws,
-                                              ea_data_file,
-                                              ddi_data_file)
+    merge, override, override_blanks = main_phase_one(views,
+                                                      src_ws,
+                                                      ea_data_file,
+                                                      ddi_data_file)
 
     # Send data off to be written.
     logger.info('Writing Data.  Please refer to the reports dir.')
     _write_output_for_merge_csv(merge, merge_file)
-    _write_output_for_overwrite_csv(overwrite, overwrite_file)
-    _write_output_for_delete_csv(delete, delete_file)
+    _write_output_for_override_csv(override, override_file)
+    _write_output_for_override_blanks_csv(override_blanks,
+                                          override_to_blank_file)
 
 
 if __name__ == '__main__':
