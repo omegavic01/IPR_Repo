@@ -140,6 +140,48 @@ def main():
     processed_sorted_ddi_file = os.path.join(processed_data_path,
                                              'DDI_IPR_Sorted.xlsx')
 
+    omc_it_parent_list = [
+        "CDS - Guest Range 1",
+        "PROD WEST",
+        "MGMT WEST",
+        "VOICE WEST",
+        "VOICE WEST",
+        "NONAGENCY West",
+        "NONAGENCY EAST",
+        "AGENCY WEST",
+        "Agency West",
+        "PROD EAST",
+        "MGMT EAST",
+        "VOICE EAST",
+        "VOICE EAST",
+        "HUB EAST",
+        "Agency East Space",
+        "Agency East Space",
+        "Administrative Container",
+        "Administrative Container",
+        "Administrative Container",
+        "Administrative Container",
+        "AGENCY EMEA SPACE",
+        "EMEA - Users @ Bankside",
+        'Upper Range Assigned for "other" EMEA sites',
+        "PROD EMEA",
+        "MGMT EMEA",
+        "EMEA NON-AGENCY SPACE",
+        "Administrative Container",
+        "AGENCY EAST",
+        "VOICE EMEA",
+        "Administrative Container",
+        "Administrative Container",
+        "Administrative Container",
+        "Administrative Container",
+        "Administrative Container",
+        "Administrative Container",
+        "Administrative Container",
+        "Administrative Container",
+        "Administrative Container",
+        "AGENCY WEST"
+    ]
+
     # Opens ddi_workbook.xls
     rddi = open_workbook(ddi_file)
     rddifirst_sheet = rddi.sheet_by_index(0)
@@ -153,7 +195,9 @@ def main():
                 'Filt-Free-ip-00890': [],
                 'Filt-Cidr-15-to-Cidr-1': [],
                 'Filt-Public-ip': [],
-                'Filt-Wan_test': []}
+                'Filt-Wan_test': [],
+                'Filt-OMC-IT-Parent-Subnet': [],
+                'Filt-MStar': {}}
     for i in range(rddifirst_sheet.nrows):
         if i == 0:
             continue
@@ -173,12 +217,19 @@ def main():
             ddi_dict['Filt-Free-ip-00890'].\
                 append(rddifirst_sheet.row_values(i))
             continue
+        if rddifirst_sheet.row_values(i)[5] in omc_it_parent_list:
+            ddi_dict['Filt-OMC-IT-Parent-Subnet'].append(
+                rddifirst_sheet.row_values(i))
+            continue
         if int(rddifirst_sheet.row_values(i)[2][1:3]) in range(1, 16):
             ddi_dict['Filt-Cidr-15-to-Cidr-1'].\
                 append(rddifirst_sheet.row_values(i))
             continue
         if rddifirst_sheet.row_values(i)[4] == 'Public-IP':
             ddi_dict['Filt-Public-ip'].append(rddifirst_sheet.row_values(i))
+            continue
+        if '00407' in rddifirst_sheet.row_values(i)[4]:
+            ddi_dict['Filt-MStar'].append(rddifirst_sheet.row_values(i))
             continue
         if rddifirst_sheet.row_values(i)[4] == 'wan_test':
             ddi_dict['Filt-Wan_test'].append(rddifirst_sheet.row_values(i))
