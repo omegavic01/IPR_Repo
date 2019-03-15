@@ -26,6 +26,39 @@ def cidr_to_netmask(cidr):
     return netmask
 
 
+def _write_output_for_add_csv(data, ea_path, file):
+    """
+    This function writes out a .csv file for an import type: add.
+    """
+    with open(ea_path, 'rb') as file_in:  # API data from DDI EA-Attributes
+        ea_index = _get_ea_index(pickle.load(file_in))
+    with open(file, 'w', encoding='utf-8', newline='') as csvfile:
+        file_write = csv.writer(csvfile, delimiter='\t')
+        for stuff in data:
+            # Initial Row fields built
+            temp_data = [stuff[14],
+                         stuff[1].split('/')[0],
+                         stuff[1].split('/')[1],
+                         stuff[15]]
+            temp_header = ['header-networkcontainer',
+                           'address*',
+                           'netmask*',
+                           'network_view']
+            # Check for comments
+            if stuff[12]:
+                temp_data.append(stuff[12])
+                temp_header.append('comment')
+            # Check for EA's
+            for key in ea_index.keys():
+                if stuff[ea_index[key]]:
+                    temp_header.append('EA-'+key)
+                    temp_data.append(stuff[ea_index[key]])
+            # Write Header Row on new line.
+            file_write.writerow(temp_header)
+            # Write data Row on new line.
+            file_write.writerow(temp_data)
+
+
 def _write_output_for_merge_csv(data, file):
     """
     This function writes out a .csv file for an import type: merge.
@@ -291,6 +324,7 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
         -- import_overwrite - data set to go through an overwrite import
                                 process.
     """
+    import_add = []
     import_merge = []
     import_delete = []
     import_override = []
@@ -299,13 +333,16 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
         if idx == 0:
             continue
         src_row = src_ws.row_values(idx)
+        # Add Check.
+        if 'add' in src_row[0].lower():
+            import_add.append(src_row)
+            continue
         ddi = ddi_data[views_index[src_row[15]]][src_row[1].strip()]
 
         temp_dict_merge = {}
-        temp_dict_delete = {}
         temp_dict_override = {}
         temp_dict_override_to_blank = {}
-        # Delete Check.
+        # Delete Check
         if 'del' in src_row[0].lower():
             import_delete.append([src_row[15], src_row[1], src_row[14]])
             continue
@@ -354,7 +391,7 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
                                              src_row[1].strip(),
                                              src_row[14].strip(),
                                              temp_dict_override_to_blank])
-    return import_merge, import_delete, import_override, \
+    return import_add, import_merge, import_delete, import_override, \
            import_override_to_blank
 
 
@@ -492,11 +529,14 @@ def get_ddi_ip_data(net_views, ea_path, ddi_path, logger):
         ddi_data.pkl
     """
     # Pull down fresh copy of ea-att's
+    logger.info("Getting EA Attributes from DDI.")
     get_ea_attributes(ea_path, logger)
 
     # Pull down fresh copy of view data
     ddi_data = []
     for view in net_views:
+        if not view:
+            continue
         logger.info("Getting data for view: %s", view)
         ddijsonnet = api_call_network_views(view, logger)
         ddijsonnetcont = api_call_networkcontainer_views(view, logger)
@@ -558,6 +598,7 @@ def main():
                             'Final_DDI-IPR-DivDD-3.13.19.xlsx')
     ea_data_file = os.path.join(raw_data_path, 'ea_data.pkl')
     ddi_data_file = os.path.join(raw_data_path, 'ddi_data.pkl')
+    add_file = os.path.join(reports_data_path, 'Add Import.csv')
     merge_file = os.path.join(reports_data_path, 'Merge Import.csv')
     delete_file = os.path.join(reports_data_path, 'Delete Import.csv')
     override_file = os.path.join(reports_data_path, 'Override Import.csv')
@@ -566,7 +607,7 @@ def main():
 
     logger.info('Loading Data')
     src_wb = open_workbook(src_file)
-    src_ws = src_wb.sheet_by_index(2)
+    src_ws = src_wb.sheet_by_index(3)
 
     logger.info('Compiling list of views.')
     views = _get_views(src_ws.ncols, src_ws)
@@ -578,13 +619,13 @@ def main():
         get_ddi_ip_data(views, ea_data_file, ddi_data_file, logger)
 
     # Building data sets for in preparation for writing.
-    merge, delete, override, override_blanks = main_phase_one(views,
-                                                              src_ws,
-                                                              ea_data_file,
-                                                              ddi_data_file)
+    add, merge, delete, override, override_blanks = \
+        main_phase_one(views, src_ws, ea_data_file, ddi_data_file)
 
     # Send data off to be written.
     logger.info('Writing Data.  Please refer to the reports dir.')
+    if add:
+        _write_output_for_add_csv(add, ea_data_file, add_file)
     if merge:
         _write_output_for_merge_csv(merge, merge_file)
     if delete:
@@ -609,9 +650,6 @@ if __name__ == '__main__':
 
     # load up the entries as environment variables
     load_dotenv(DOTENV_PATH)
-
-    # Headerrow for IPR Output
-    HEADER_ROW = os.environ.get("IPR_HEADER_ROW").split(',')
 
     # PAYLOAD for login to IPAM
     PAYLOAD = {
