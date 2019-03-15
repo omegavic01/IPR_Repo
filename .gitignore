@@ -78,6 +78,7 @@ target/
 # exclude data from source control by default
 data/interim/*.*
 reports/figures/*.*
+reports/Old_Data/*.*
 data/processed/*.*
 data/interim/Old Updates/*.*
 data/processed/*.*
