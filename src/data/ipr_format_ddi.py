@@ -11,6 +11,7 @@ DataSets:
 import os
 import logging
 import operator
+import pickle
 from xlrd import open_workbook
 from ipaddr import IPv4Network
 from openpyxl import Workbook
@@ -55,7 +56,7 @@ def _sorting_data(interim_sorted_file, interim_unsorted_file):
     output_wb.save(interim_sorted_file)
 
 
-def _write_output_to_master(ddi_dic, path):
+def _write_output_to_master(idx, ddi_dic, path):
     """
     Write out the rows in IPR expected format.
 
@@ -83,18 +84,20 @@ def _write_output_to_master(ddi_dic, path):
         for bit in ddi_dic[sheet_name]:
             row = row + 1
             w_s.cell(row=row, column=col + 2, value=bit[3])  # Cidr
-            w_s.cell(row=row, column=col + 3, value=bit[23])  # region
-            w_s.cell(row=row, column=col + 4, value=bit[15])  # country
-            w_s.cell(row=row, column=col + 5, value=bit[12])  # city
-            w_s.cell(row=row, column=col + 6, value=bit[7])  # address
-            w_s.cell(row=row, column=col + 7, value=bit[27])  # site
-            w_s.cell(row=row, column=col + 8, value=bit[16])  # datacenter
-            w_s.cell(row=row, column=col + 9, value=bit[17])  # division
-            w_s.cell(row=row, column=col + 10, value=bit[26])  # email
-            w_s.cell(row=row, column=col + 11, value=bit[8])  # agency
+            w_s.cell(row=row, column=col + 3, value=bit[idx['Region_List']])
+            w_s.cell(row=row, column=col + 4, value=bit[idx['CO']])
+            w_s.cell(row=row, column=col + 5, value=bit[idx['City']])
+            w_s.cell(row=row, column=col + 6, value=bit[idx['Address']])
+            w_s.cell(row=row, column=col + 7, value=bit[idx['Site']])
+            w_s.cell(row=row, column=col + 8, value=bit[idx['Datacenter']])
+            w_s.cell(row=row, column=col + 9, value=bit[idx['Div']])
+            w_s.cell(row=row, column=col + 10, value=bit[idx['Req Email']])
+            w_s.cell(row=row, column=col + 11, value=bit[idx['Agency']])
             w_s.cell(row=row, column=col + 13, value=bit[5])  # comment
-            w_s.cell(row=row, column=col + 12, value=bit[31])  # vlandesc
-            w_s.cell(row=row, column=col + 14, value=bit[19])  # interfacename
+            w_s.cell(row=row, column=col + 12, value=bit[idx[
+                                                    'VLAN Description']])
+            w_s.cell(row=row, column=col + 14, value=bit[idx[
+                                                    'Interface Name']])
             w_s.cell(row=row, column=col + 15, value=bit[0])  # ddi_type
             w_s.cell(row=row, column=col + 16, value=bit[4])  # ddi_view
             w_s.cell(row=row, column=col + 17, value='DDI')
@@ -119,6 +122,25 @@ def _write_output_to_master(ddi_dic, path):
     work_book.save(path)
 
 
+def _build_header_ea_index(header, ea):
+    with open(ea, 'rb') as f_i:
+        eatts = pickle.load(f_i)
+    ea_idx_dict = {
+        header[2]: eatts.index('Region_List'),
+        header[3]: eatts.index('Country'),
+        header[4]: eatts.index('City'),
+        header[5]: eatts.index('Address'),
+        header[6]: eatts.index('Site'),
+        header[7]: eatts.index('Datacenter'),
+        header[8]: eatts.index('Division'),
+        header[9]: eatts.index('Requester Email'),
+        header[10]: eatts.index('Agency'),
+        header[11]: eatts.index('VLAN Description'),
+        header[13]: eatts.index('Interface Name')
+        }
+    return ea_idx_dict
+
+
 def main():
     """
     Takes path and opens workbook.  Takes in DDI data and filters out
@@ -135,16 +157,18 @@ def main():
     interim_data_path = os.path.join(PROJECT_DIR, 'data', 'interim')
     processed_data_path = os.path.join(PROJECT_DIR, 'data', 'processed')
     ddi_file = os.path.join(raw_data_path, 'ddi_workbook.xls')
+    ea_file = os.path.join(raw_data_path, 'ddi_dump_header.pkl')
     interim_unsorted_ddi_file = os.path.join(interim_data_path,
                                              'DDI_IPR_Unsorted.xlsx')
     processed_sorted_ddi_file = os.path.join(processed_data_path,
                                              'DDI_IPR_Sorted.xlsx')
 
-    omc_it_parent_list = [
+    idx = _build_header_ea_index(HEADER_ROW, ea_file)
+
+    omc_it_parent_list = list({
         "CDS - Guest Range 1",
         "PROD WEST",
         "MGMT WEST",
-        "VOICE WEST",
         "VOICE WEST",
         "NONAGENCY West",
         "NONAGENCY EAST",
@@ -153,13 +177,8 @@ def main():
         "PROD EAST",
         "MGMT EAST",
         "VOICE EAST",
-        "VOICE EAST",
         "HUB EAST",
         "Agency East Space",
-        "Agency East Space",
-        "Administrative Container",
-        "Administrative Container",
-        "Administrative Container",
         "Administrative Container",
         "AGENCY EMEA SPACE",
         "EMEA - Users @ Bankside",
@@ -171,16 +190,7 @@ def main():
         "AGENCY EAST",
         "VOICE EMEA",
         "Administrative Container",
-        "Administrative Container",
-        "Administrative Container",
-        "Administrative Container",
-        "Administrative Container",
-        "Administrative Container",
-        "Administrative Container",
-        "Administrative Container",
-        "Administrative Container",
-        "AGENCY WEST"
-    ]
+        "AGENCY WEST"})
 
     # Opens ddi_workbook.xls
     rddi = open_workbook(ddi_file)
@@ -241,8 +251,8 @@ def main():
 
     # Send information for processing and to write output.
     logger.info('Building Data Set for Sorting')
-    _write_output_to_master(ddi_dict, interim_unsorted_ddi_file)
-    logger.info('Sorting Data and writing out DDI_IPR_Sorted.xlsx.')
+    _write_output_to_master(idx, ddi_dict, interim_unsorted_ddi_file)
+    logger.info('Writing out DDI_IPR_Sorted.xlsx in data\processed.')
     _sorting_data(processed_sorted_ddi_file, interim_unsorted_ddi_file)
     logger.info('Script Complete')
 

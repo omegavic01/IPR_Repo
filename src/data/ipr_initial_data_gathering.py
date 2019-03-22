@@ -3,12 +3,12 @@ This script is intended to pull the entire IPAM database from DDI then
 generates and creates a .xls file then saving it to the path directory.
 """
 import os
-import sys
 import time
 import json
 from datetime import datetime
 import logging
 import requests
+import pickle
 from dotenv import find_dotenv, load_dotenv
 requests.packages.urllib3.disable_warnings()
 
@@ -24,7 +24,7 @@ def write_log(logs, path):
             file_log.write('\n')
 
 
-def wr_output_xls(ddi_data, path, logger):
+def wr_output_xls(ddi_data, path, raw_path, logger):
     """
     URLS used to assist in coding with the xlwt module
 
@@ -60,27 +60,10 @@ def wr_output_xls(ddi_data, path, logger):
     except OSError as fileerr:
         filename1 = 'ddi_workbook_' + datetime.now().strftime("%Y%m%d-%H%M%S")\
                     + '.xls'
+        path = os.path.join(raw_path, filename1)
         logger.warning('Typically due to a permissions issue!')
         logger.warning('Renaming file to %s, %s', filename1, fileerr)
         wrk_book.save(path)
-
-
-def ref(_ref):
-    """
-    Takes the _ref dict and performs multiple splits to then return the
-    network and the cidr.
-    Example Input:
-    'networkcontainer/ZG5zLm5ldHdvcmtfY29udGFpbmVyJDEwMC42NC4wLjAvMTAvMzYy:
-    100.64.0.0/10/UNO'
-
-    Return Arguments:
-    network -- ['100.64.0.0', '10', 'UNO']
-    dditype -- 'networkcontainer'
-    """
-    ref_split = _ref.split(':')
-    ref_data = ref_split[1].split('/')
-    ddi_type = ref_split[0].split('/')[0]
-    return ref_data, ddi_type
 
 
 def process_data(process_json, ea_att_sorted):
@@ -93,14 +76,11 @@ def process_data(process_json, ea_att_sorted):
     """
     data_return = []
     for i in process_json:
-        temp_data_list = []
-        if '_ref' in i:
-            ref_data, ddi_type = (ref(i['_ref']))
-            temp_data_list.append(ddi_type)
-            temp_data_list.append(ref_data[0])
-            temp_data_list.append('/'+ref_data[1])
-            temp_data_list.append(temp_data_list[1] + temp_data_list[2])
-            temp_data_list.append(ref_data[2])
+        temp_data_list = [i['_ref'].split('/')[0],
+                          i['network'].split('/')[0],
+                          '/'+i['network'].split('/')[1],
+                          i['network'],
+                          i['network_view']]
         if 'comment' not in i:
             temp_data_list.append('')
         else:
@@ -116,6 +96,14 @@ def process_data(process_json, ea_att_sorted):
                                                    eavalue[e_att]['value']))
                 elif e_att in eavalue:
                     temp_data_list.append(eavalue[e_att]['value'])
+        else:
+            for idx in range(len(ea_att_sorted)):
+                temp_data_list.append('')
+        if i['utilization']:
+            temp_data_list.append(str(i['utilization'])[:-1] + '.' +
+                                  str(i['utilization'])[-1])
+        else:
+            temp_data_list.append('null')
         data_return.append(temp_data_list)
     return data_return
 
@@ -133,7 +121,8 @@ def api_call_network_views(view, logger):
     for iview in range(trynetwork):
         try:
             rnet = requests.get(PAYLOAD['url'] + "network?_return_fields="
-                                                 "extattrs,comment&"
+                                                 "extattrs,comment,network,"
+                                                 "network_view,utilization&"
                                                  "network_view=" + view,
                                 "_max_results=-5000",
                                 auth=(PAYLOAD['username'],
@@ -166,7 +155,9 @@ def api_call_networkcontainer_views(view, logger):
         try:
             rnetcont = requests.get(PAYLOAD['url'] + "networkcontainer?"
                                                      "_return_fields=extattrs,"
-                                                     "comment&network_view=" +
+                                                     "comment,utilization,"
+                                                     "network,network_view"
+                                                     "&network_view=" +
                                     view, "_max_results=-5000",
                                     auth=(PAYLOAD['username'],
                                           PAYLOAD['password']),
@@ -268,6 +259,16 @@ def get_ea_attributes():
     return eattl
 
 
+def _create_title(title_filename, ea):
+    """Creating Workbook Title"""
+    title_list = ["DDI Type", "Network", "Subnet", "CIDR", "View", "Comment"]
+    title_list.extend(ea)
+    title_list.extend(['Utilization in %'])
+    with open(title_filename, 'wb') as f_o:
+        pickle.dump(title_list, f_o)
+    return title_list
+
+
 def main(project_dir):
     """
     Controller for the raw data pulls needed to acquire the entire IPAM
@@ -278,6 +279,7 @@ def main(project_dir):
     logger.info('Beginning of Script')
     raw_data_path = os.path.join(project_dir, 'data', 'raw')
     ddi_data_path = os.path.join(raw_data_path, 'ddi_workbook.xls')
+    title_data_path = os.path.join(raw_data_path, 'ddi_dump_header.pkl')
     logs_data_path = os.path.join(raw_data_path, 'ddi_logs.txt')
 
     # Query DDI for Extensible Attributes
@@ -286,8 +288,7 @@ def main(project_dir):
     logger.info('Pulling EA Attributes: Completed')
 
     # Build Title list. Agreed upon IP-Reco Teams format.
-    title_list = ["DDI Type", "Network", "Subnet", "CIDR", "View", "Comment"]
-    title_list.extend(ddi_ea_attr_sorted)
+    title = _create_title(title_data_path, ddi_ea_attr_sorted)
 
     # Query DDI for Network Views:
     logger.info('Pulling Network Views: Beginning')
@@ -297,14 +298,14 @@ def main(project_dir):
     # This step pulls the ddi data, cleans it, then returns the cleaned data.
     logger.info('Pulling DDI Data: Beginning')
     data_list, loggs = get_ddi_ip_data(ddi_ea_attr_sorted,
-                                       title_list,
+                                       title,
                                        net_views,
                                        logger)
     logger.info('Pulling DDI Data: Completed')
 
     # Writes output to an xls file.
     logger.info('Writing Data: Beginning')
-    wr_output_xls(data_list, ddi_data_path, logger)
+    wr_output_xls(data_list, ddi_data_path, raw_data_path, logger)
     logger.info('Writing Data: Completed')
 
     # Takes any logs received during the get_ddi_ip_data function and writes.
