@@ -162,8 +162,8 @@ ipr_diff_to_ddi_import.py
 -   Output File: Merge Leaf Import.csv
 -   Output File: Merge Ignore Import.csv
 
-Additional Features: If the following has been added in the dispostion field of
-the IPR sheet.  [add, del, ignore, dup, leaf]  This script will run a seperate
+Additional Features: If the following has been added in the disposition field
+of the IPR sheet.[add, del, ignore, dup, leaf] This script will run a separate
 function and create separate import sheets for each.
 
 Summary:  For the first run of this script you will want to update ddi_api_call
