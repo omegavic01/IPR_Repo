@@ -325,6 +325,9 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
                                 process.
     """
     import_add = []
+    import_leaf = []
+    import_dup = []
+    import_ignore = []
     import_merge = []
     import_delete = []
     import_override = []
@@ -342,6 +345,15 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
         temp_dict_merge = {}
         temp_dict_override = {}
         temp_dict_override_to_blank = {}
+        # dup Check
+        if 'dup' in src_row[0].lower():
+            import_dup.append([src_row[15], src_row[1], src_row[14]])
+        # leaf Check in dispostion
+        if 'leaf' in src_row[0].lower():
+            import_leaf.append([src_row[15], src_row[1], src_row[14]])
+        # ignore Check in dispostion
+        if 'ignore' in src_row[0].lower():
+            import_ignore.append([src_row[15], src_row[1], src_row[14]])
         # Delete Check
         if 'del' in src_row[0].lower():
             import_delete.append([src_row[15], src_row[1], src_row[14]])
@@ -595,7 +607,7 @@ def main():
 
     # Build File and File path.
     src_file = os.path.join(processed_data_path,
-                            'Final_DDI-IPR-DivDD-3.13.19.xlsx')
+                            'Potential Updates for DDI.xlsx')
     ea_data_file = os.path.join(raw_data_path, 'ea_data.pkl')
     ddi_data_file = os.path.join(raw_data_path, 'ddi_data.pkl')
     add_file = os.path.join(reports_data_path, 'Add Import.csv')
@@ -607,7 +619,7 @@ def main():
 
     logger.info('Loading Data')
     src_wb = open_workbook(src_file)
-    src_ws = src_wb.sheet_by_index(3)
+    src_ws = src_wb.sheet_by_index(0)
 
     logger.info('Compiling list of views.')
     views = _get_views(src_ws.ncols, src_ws)
