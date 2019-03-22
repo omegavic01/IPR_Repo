@@ -5,10 +5,10 @@ generates and creates a .xls file then saving it to the path directory.
 import os
 import time
 import json
+import pickle
 from datetime import datetime
 import logging
 import requests
-import pickle
 from dotenv import find_dotenv, load_dotenv
 requests.packages.urllib3.disable_warnings()
 
@@ -85,6 +85,11 @@ def process_data(process_json, ea_att_sorted):
             temp_data_list.append('')
         else:
             temp_data_list.append(i['comment'])
+        if i['utilization']:
+            temp_data_list.append(str(i['utilization'])[:-1] + '.' +
+                                  str(i['utilization'])[-1])
+        else:
+            temp_data_list.append('null')
         if 'extattrs' in i and i['extattrs'] != {}:
             eavalue = i['extattrs']
             for e_att in ea_att_sorted:
@@ -96,14 +101,6 @@ def process_data(process_json, ea_att_sorted):
                                                    eavalue[e_att]['value']))
                 elif e_att in eavalue:
                     temp_data_list.append(eavalue[e_att]['value'])
-        else:
-            for idx in range(len(ea_att_sorted)):
-                temp_data_list.append('')
-        if i['utilization']:
-            temp_data_list.append(str(i['utilization'])[:-1] + '.' +
-                                  str(i['utilization'])[-1])
-        else:
-            temp_data_list.append('null')
         data_return.append(temp_data_list)
     return data_return
 
@@ -222,7 +219,7 @@ def get_views():
         for key in raw_view.keys():
             if key == 'name':
                 views.append(raw_view[key])
-    # views = ['UNO']  # Instead of pulling all views.
+    views = ['UNO']  # Instead of pulling all views.
     return views
 
 
@@ -259,11 +256,11 @@ def get_ea_attributes():
     return eattl
 
 
-def _create_title(title_filename, ea):
+def _create_title(title_filename, e_att):
     """Creating Workbook Title"""
-    title_list = ["DDI Type", "Network", "Subnet", "CIDR", "View", "Comment"]
-    title_list.extend(ea)
-    title_list.extend(['Utilization in %'])
+    title_list = ["DDI Type", "Network", "Subnet", "CIDR", "View", "Comment",
+                  "Utilization in %"]
+    title_list.extend(e_att)
     with open(title_filename, 'wb') as f_o:
         pickle.dump(title_list, f_o)
     return title_list

@@ -63,7 +63,6 @@ def _write_output_to_master(idx, ddi_dic, path):
     Output File:
         output_file - DDI_to_IPR_Unsorted.xlsx
     """
-
     sheet_name_list = []
     for i in ddi_dic.keys():
         sheet_name_list.append(i)
@@ -78,42 +77,41 @@ def _write_output_to_master(idx, ddi_dic, path):
         w_s = work_book.create_sheet(sheet_name, enum)  # work_sheet
         w_s.title = sheet_name
         row = 1
-        col = 0
         for index, item in enumerate(HEADER_ROW):
             w_s.cell(row=row, column=index + 1, value=item)
         for bit in ddi_dic[sheet_name]:
             row = row + 1
-            w_s.cell(row=row, column=col + 2, value=bit[3])  # Cidr
-            w_s.cell(row=row, column=col + 3, value=bit[idx['Region_List']])
-            w_s.cell(row=row, column=col + 4, value=bit[idx['CO']])
-            w_s.cell(row=row, column=col + 5, value=bit[idx['City']])
-            w_s.cell(row=row, column=col + 6, value=bit[idx['Address']])
-            w_s.cell(row=row, column=col + 7, value=bit[idx['Site']])
-            w_s.cell(row=row, column=col + 8, value=bit[idx['Datacenter']])
-            w_s.cell(row=row, column=col + 9, value=bit[idx['Div']])
-            w_s.cell(row=row, column=col + 10, value=bit[idx['Req Email']])
-            w_s.cell(row=row, column=col + 11, value=bit[idx['Agency']])
-            w_s.cell(row=row, column=col + 13, value=bit[5])  # comment
-            w_s.cell(row=row, column=col + 12, value=bit[idx[
-                                                    'VLAN Description']])
-            w_s.cell(row=row, column=col + 14, value=bit[idx[
-                                                    'Interface Name']])
-            w_s.cell(row=row, column=col + 15, value=bit[0])  # ddi_type
-            w_s.cell(row=row, column=col + 16, value=bit[4])  # ddi_view
-            w_s.cell(row=row, column=col + 17, value='DDI')
-            mycell = w_s.cell(row=row, column=col + 18)
+            w_s.cell(row=row, column=2, value=bit[3])  # Cidr
+            w_s.cell(row=row, column=3, value=bit[idx['Region_List']])
+            w_s.cell(row=row, column=4, value=bit[idx['CO']])
+            w_s.cell(row=row, column=5, value=bit[idx['City']])
+            w_s.cell(row=row, column=6, value=bit[idx['Address']])
+            w_s.cell(row=row, column=7, value=bit[idx['Site']])
+            w_s.cell(row=row, column=8, value=bit[idx['Datacenter']])
+            w_s.cell(row=row, column=9, value=bit[idx['Div']])
+            w_s.cell(row=row, column=10, value=bit[idx['Req Email']])
+            w_s.cell(row=row, column=11, value=bit[idx['Agency']])
+            w_s.cell(row=row, column=13, value=bit[5])  # comment
+            w_s.cell(row=row, column=12, value=bit[
+                idx['VLAN Description']])
+            w_s.cell(row=row, column=14, value=bit[
+                idx['Interface Name']])
+            w_s.cell(row=row, column=15, value=bit[0])  # ddi_type
+            w_s.cell(row=row, column=16, value=bit[4])  # ddi_view
+            w_s.cell(row=row, column=17, value='DDI')
+            mycell = w_s.cell(row=row, column=18)
             mycell.alignment = Alignment(horizontal='left')
             mycell.value = int(bit[3].split('.')[0])  # 1st octet
-            mycell = w_s.cell(row=row, column=col + 19)
+            mycell = w_s.cell(row=row, column=19)
             mycell.alignment = Alignment(horizontal='left')
             mycell.value = int(bit[3].split('.')[1])  # 2nd octet
-            mycell = w_s.cell(row=row, column=col + 20)
+            mycell = w_s.cell(row=row, column=20)
             mycell.alignment = Alignment(horizontal='left')
             mycell.value = int(bit[3].split('.')[2])  # 3rd octet
-            mycell = w_s.cell(row=row, column=col + 21)
+            mycell = w_s.cell(row=row, column=21)
             mycell.alignment = Alignment(horizontal='left')
             mycell.value = int(bit[3].split('.')[3].split('/')[0])  # 4th octet
-            mycell = w_s.cell(row=row, column=col + 22)
+            mycell = w_s.cell(row=row, column=22)
             mycell.alignment = Alignment(horizontal='left')
             mycell.value = int(bit[3].split('/')[1])  # cidr for network addr.
     if 'Sheet' in work_book.sheetnames:
@@ -122,8 +120,92 @@ def _write_output_to_master(idx, ddi_dic, path):
     work_book.save(path)
 
 
-def _build_header_ea_index(header, ea):
-    with open(ea, 'rb') as f_i:
+def _filter_data(file):
+    rddi = open_workbook(file)
+    rddifirst_sheet = rddi.sheet_by_index(0)
+
+    omc_it_parent_list = list({
+        "CDS - Guest Range 1",
+        "PROD WEST",
+        "MGMT WEST",
+        "VOICE WEST",
+        "NONAGENCY West",
+        "NONAGENCY EAST",
+        "AGENCY WEST",
+        "Agency West",
+        "PROD EAST",
+        "MGMT EAST",
+        "VOICE EAST",
+        "HUB EAST",
+        "Agency East Space",
+        "Administrative Container",
+        "AGENCY EMEA SPACE",
+        "EMEA - Users @ Bankside",
+        'Upper Range Assigned for "other" EMEA sites',
+        "PROD EMEA",
+        "MGMT EMEA",
+        "EMEA NON-AGENCY SPACE",
+        "Administrative Container",
+        "AGENCY EAST",
+        "VOICE EMEA",
+        "Administrative Container",
+        "AGENCY WEST"})
+
+    #  For filtering out data not needed.
+    ddi_dict = {'MASTER': [],
+                'Filt-Cidr-32': [],
+                'Filt-100.88-Cidr-29': [],
+                'Filt-100.64-Cidr-29': [],
+                'Filt-Free-ip-00890': [],
+                'Filt-Cidr-15-to-Cidr-1': [],
+                'Filt-Public-ip-View': [],
+                'Filt-Wan_test-View': [],
+                'Filt-OMC-IT-Parent-Subnet': [],
+                'Filt-MStar': []}
+    for i in range(rddifirst_sheet.nrows):
+        if i == 0:
+            continue
+        if '/32' in rddifirst_sheet.row_values(i)[2]:
+            ddi_dict['Filt-Cidr-32'].append(rddifirst_sheet.row_values(i))
+            continue
+        if '100.88.0.0/29' in rddifirst_sheet.row_values(i)[3]:
+            ddi_dict['Filt-100.88-Cidr-29'].\
+                append(rddifirst_sheet.row_values(i))
+            continue
+        if '100.64.0.0/29' in rddifirst_sheet.row_values(i)[3]:
+            ddi_dict['Filt-100.64-Cidr-29'].\
+                append(rddifirst_sheet.row_values(i))
+            continue
+        if 'free ip' in rddifirst_sheet.row_values(i)[5].lower() \
+                and '00890' in rddifirst_sheet.row_values(i)[4]:
+            ddi_dict['Filt-Free-ip-00890'].\
+                append(rddifirst_sheet.row_values(i))
+            continue
+        if rddifirst_sheet.row_values(i)[5] in omc_it_parent_list:
+            ddi_dict['Filt-OMC-IT-Parent-Subnet'].append(
+                rddifirst_sheet.row_values(i))
+            continue
+        if int(rddifirst_sheet.row_values(i)[2][1:3]) in range(1, 16):
+            ddi_dict['Filt-Cidr-15-to-Cidr-1'].\
+                append(rddifirst_sheet.row_values(i))
+            continue
+        if rddifirst_sheet.row_values(i)[4] == 'Public-IP':
+            ddi_dict['Filt-Public-ip-View'].append(rddifirst_sheet.row_values(i))
+            continue
+        if '00470' in rddifirst_sheet.row_values(i)[4]:
+            ddi_dict['Filt-MStar'].append(rddifirst_sheet.row_values(i))
+            continue
+        if rddifirst_sheet.row_values(i)[4] == 'wan_test':
+            ddi_dict['Filt-Wan_test-View'].append(rddifirst_sheet.row_values(i))
+            continue
+        if IPv4Network(rddifirst_sheet.row_values(i)[1]).is_private or \
+                IPv4Network(rddifirst_sheet.row_values(i)[1]).is_cgn:
+            ddi_dict['MASTER'].append(rddifirst_sheet.row_values(i))
+    return ddi_dict
+
+
+def _build_header_ea_index(header, e_att):
+    with open(e_att, 'rb') as f_i:
         eatts = pickle.load(f_i)
     ea_idx_dict = {
         header[2]: eatts.index('Region_List'),
@@ -165,94 +247,13 @@ def main():
 
     idx = _build_header_ea_index(HEADER_ROW, ea_file)
 
-    omc_it_parent_list = list({
-        "CDS - Guest Range 1",
-        "PROD WEST",
-        "MGMT WEST",
-        "VOICE WEST",
-        "NONAGENCY West",
-        "NONAGENCY EAST",
-        "AGENCY WEST",
-        "Agency West",
-        "PROD EAST",
-        "MGMT EAST",
-        "VOICE EAST",
-        "HUB EAST",
-        "Agency East Space",
-        "Administrative Container",
-        "AGENCY EMEA SPACE",
-        "EMEA - Users @ Bankside",
-        'Upper Range Assigned for "other" EMEA sites',
-        "PROD EMEA",
-        "MGMT EMEA",
-        "EMEA NON-AGENCY SPACE",
-        "Administrative Container",
-        "AGENCY EAST",
-        "VOICE EMEA",
-        "Administrative Container",
-        "AGENCY WEST"})
-
-    # Opens ddi_workbook.xls
-    rddi = open_workbook(ddi_file)
-    rddifirst_sheet = rddi.sheet_by_index(0)
-
     logger.info('Filtering out unneeded data.')
-    #  For filtering out data not needed.
-    ddi_dict = {'MASTER': [],
-                'Filt-Cidr-32': [],
-                'Filt-100.88-Cidr-29': [],
-                'Filt-100.64-Cidr-29': [],
-                'Filt-Free-ip-00890': [],
-                'Filt-Cidr-15-to-Cidr-1': [],
-                'Filt-Public-ip': [],
-                'Filt-Wan_test': [],
-                'Filt-OMC-IT-Parent-Subnet': [],
-                'Filt-MStar': {}}
-    for i in range(rddifirst_sheet.nrows):
-        if i == 0:
-            continue
-        if '/32' in rddifirst_sheet.row_values(i)[2]:
-            ddi_dict['Filt-Cidr-32'].append(rddifirst_sheet.row_values(i))
-            continue
-        if '100.88.0.0/29' in rddifirst_sheet.row_values(i)[3]:
-            ddi_dict['Filt-100.88-Cidr-29'].\
-                append(rddifirst_sheet.row_values(i))
-            continue
-        if '100.64.0.0/29' in rddifirst_sheet.row_values(i)[3]:
-            ddi_dict['Filt-100.64-Cidr-29'].\
-                append(rddifirst_sheet.row_values(i))
-            continue
-        if 'free ip' in rddifirst_sheet.row_values(i)[5].lower() \
-                and '00890' in rddifirst_sheet.row_values(i)[4]:
-            ddi_dict['Filt-Free-ip-00890'].\
-                append(rddifirst_sheet.row_values(i))
-            continue
-        if rddifirst_sheet.row_values(i)[5] in omc_it_parent_list:
-            ddi_dict['Filt-OMC-IT-Parent-Subnet'].append(
-                rddifirst_sheet.row_values(i))
-            continue
-        if int(rddifirst_sheet.row_values(i)[2][1:3]) in range(1, 16):
-            ddi_dict['Filt-Cidr-15-to-Cidr-1'].\
-                append(rddifirst_sheet.row_values(i))
-            continue
-        if rddifirst_sheet.row_values(i)[4] == 'Public-IP':
-            ddi_dict['Filt-Public-ip'].append(rddifirst_sheet.row_values(i))
-            continue
-        if '00407' in rddifirst_sheet.row_values(i)[4]:
-            ddi_dict['Filt-MStar'].append(rddifirst_sheet.row_values(i))
-            continue
-        if rddifirst_sheet.row_values(i)[4] == 'wan_test':
-            ddi_dict['Filt-Wan_test'].append(rddifirst_sheet.row_values(i))
-            continue
-        if IPv4Network(rddifirst_sheet.row_values(i)[1]).is_private:
-            ddi_dict['MASTER'].append(rddifirst_sheet.row_values(i))
-        elif IPv4Network(rddifirst_sheet.row_values(i)[1]).is_cgn:
-            ddi_dict['MASTER'].append(rddifirst_sheet.row_values(i))
+    ddi_dict = _filter_data(ddi_file)
+    logger.info('Filtering has been completed.')
 
-    # Send information for processing and to write output.
     logger.info('Building Data Set for Sorting')
     _write_output_to_master(idx, ddi_dict, interim_unsorted_ddi_file)
-    logger.info('Writing out DDI_IPR_Sorted.xlsx in data\processed.')
+    logger.info(r'Writing out DDI_IPR_Sorted.xlsx in data\processed.')
     _sorting_data(processed_sorted_ddi_file, interim_unsorted_ddi_file)
     logger.info('Script Complete')
 

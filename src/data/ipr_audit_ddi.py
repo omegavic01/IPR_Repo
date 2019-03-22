@@ -10,13 +10,13 @@ DataSets:
 """
 import logging
 import os
+import pickle
 from collections import OrderedDict
 from dotenv import find_dotenv, load_dotenv
 from xlrd import open_workbook
 from netaddr import IPNetwork
 import openpyxl
 from openpyxl.styles import Alignment
-import pickle
 from checks.master_audit_validation_check import validation_check
 
 
