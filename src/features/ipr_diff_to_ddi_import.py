@@ -118,6 +118,102 @@ def _write_output_for_merge_csv(data, file):
                                              stuff[3][item]])
 
 
+def _write_output_for_merge_dup_csv(data, file):
+    """
+    This function writes out a .csv file for an import type: merge.
+    """
+    with open(file, 'w', encoding='utf-8', newline='') as csvfile:
+        file_write = csv.writer(csvfile, delimiter='\t')
+        for stuff in data:
+            if 'network' in stuff:
+                file_write.writerow(['header-network',
+                                     'address*',
+                                     'netmask*',
+                                     'network_view',
+                                     'EA-IPR Designation'])
+                file_write.writerow([stuff[2],
+                                     stuff[1].split('/')[0],
+                                     cidr_to_netmask(stuff[1].
+                                                     split('/')[1]),
+                                     stuff[0],
+                                     'dup'])
+            if 'networkcontainer' in stuff:
+                file_write.writerow(['header-networkcontainer',
+                                     'address*',
+                                     'netmask*',
+                                     'network_view',
+                                     'EA-IPR Designation'])
+                file_write.writerow([stuff[2],
+                                     stuff[1].split('/')[0],
+                                     stuff[1].split('/')[1],
+                                     stuff[0],
+                                     'dup'])
+
+
+def _write_output_for_merge_leaf_csv(data, file):
+    """
+    This function writes out a .csv file for an import type: merge.
+    """
+    with open(file, 'w', encoding='utf-8', newline='') as csvfile:
+        file_write = csv.writer(csvfile, delimiter='\t')
+        for stuff in data:
+            if 'network' in stuff:
+                file_write.writerow(['header-network',
+                                     'address*',
+                                     'netmask*',
+                                     'network_view',
+                                     'EA-IPR Designation'])
+                file_write.writerow([stuff[2],
+                                     stuff[1].split('/')[0],
+                                     cidr_to_netmask(stuff[1].
+                                                     split('/')[1]),
+                                     stuff[0],
+                                     'leaf'])
+            if 'networkcontainer' in stuff:
+                file_write.writerow(['header-networkcontainer',
+                                     'address*',
+                                     'netmask*',
+                                     'network_view',
+                                     'EA-IPR Designation'])
+                file_write.writerow([stuff[2],
+                                     stuff[1].split('/')[0],
+                                     stuff[1].split('/')[1],
+                                     stuff[0],
+                                     'leaf'])
+
+
+def _write_output_for_merge_ignore_csv(data, file):
+    """
+    This function writes out a .csv file for an import type: merge.
+    """
+    with open(file, 'w', encoding='utf-8', newline='') as csvfile:
+        file_write = csv.writer(csvfile, delimiter='\t')
+        for stuff in data:
+            if 'network' in stuff:
+                file_write.writerow(['header-network',
+                                     'address*',
+                                     'netmask*',
+                                     'network_view',
+                                     'EA-IPR Designation'])
+                file_write.writerow([stuff[2],
+                                     stuff[1].split('/')[0],
+                                     cidr_to_netmask(stuff[1].
+                                                     split('/')[1]),
+                                     stuff[0],
+                                     'ignore'])
+            if 'networkcontainer' in stuff:
+                file_write.writerow(['header-networkcontainer',
+                                     'address*',
+                                     'netmask*',
+                                     'network_view',
+                                     'EA-IPR Designation'])
+                file_write.writerow([stuff[2],
+                                     stuff[1].split('/')[0],
+                                     stuff[1].split('/')[1],
+                                     stuff[0],
+                                     'ignore'])
+
+
 def _write_output_for_delete_csv(data, file):
     """
     This function writes out a .csv file for an import type: delete.
@@ -276,28 +372,17 @@ def _get_view_index(views, ddi_data):
     return views_index_temp
 
 
-def _get_ea_index(ea_data):
-    """Build index table from a sorted list of ea att's.  The index number is
-    the value associated to the ea from the update data.  Any changes to EA's
-    may require an update here.  Final output is a dict.
-
-    Current Layout as of 3/6/2019:
-    ea_data[1]: 6  # Address
-    ea_data[2]: 10  # Agency
-    ea_data[6]: 4  # City
-    ea_data[9]: 3  # Country
-    ea_data[10]: 7  # Datacenter
-    ea_data[11]: 8  # Division
-    ea_data[13]: 13  # Interface Name
-    ea_data[17]: 2  # Region_List
-    ea_data[20]: 9  # Requester Email
-    ea_data[21]: 6  # Site
-    ea_data[25]: 11  # Vlan Description
+def _get_ea_index():
     """
-    ea_index_temp = {ea_data[1]: 5, ea_data[2]: 10, ea_data[6]: 4,
-                     ea_data[9]: 3, ea_data[10]: 7, ea_data[11]: 8,
-                     ea_data[13]: 13, ea_data[17]: 2, ea_data[20]: 9,
-                     ea_data[21]: 6, ea_data[25]: 11}
+    Manually build index table for the ea att's.  The index number is
+    the value associated to the ea from the update data.  If an EA has been
+    renamed in IB.  An update will be required here. If an EA has had its name
+    changed an update will be required here. Final output is a dict.
+    """
+    ea_index_temp = {'Address': 5, 'Agency': 10, 'City': 4, 'Country': 3,
+                     'Datacenter': 7, 'Division': 8, 'Interface Name': 13,
+                     'Region_List': 2, 'Requester Email': 9, 'Site': 6,
+                     'VLAN Description': 11}
     return ea_index_temp
 
 
@@ -321,13 +406,14 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
         -- Ex_List = ['Network_View', 'Network', 'DDI_Type', Dict]
     Return Arguments:
         -- import_merge - data set to go through a merge import process.
-        -- import_overwrite - data set to go through an overwrite import
-                                process.
+        -- import_delete - data set to go through a delete import process.
+        -- import_override - data set to go through an override import
+        -- import_override_to_blank - data set to go through an override import
     """
     import_add = []
-    import_leaf = []
-    import_dup = []
-    import_ignore = []
+    import_merge_leaf = []
+    import_merge_dup = []
+    import_merge_ignore = []
     import_merge = []
     import_delete = []
     import_override = []
@@ -345,15 +431,15 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
         temp_dict_merge = {}
         temp_dict_override = {}
         temp_dict_override_to_blank = {}
-        # dup Check
+        # dup Check in disposition
         if 'dup' in src_row[0].lower():
-            import_dup.append([src_row[15], src_row[1], src_row[14]])
-        # leaf Check in dispostion
+            import_merge_dup.append([src_row[15], src_row[1], src_row[14]])
+        # leaf Check in disposition
         if 'leaf' in src_row[0].lower():
-            import_leaf.append([src_row[15], src_row[1], src_row[14]])
-        # ignore Check in dispostion
+            import_merge_leaf.append([src_row[15], src_row[1], src_row[14]])
+        # ignore Check in disposition
         if 'ignore' in src_row[0].lower():
-            import_ignore.append([src_row[15], src_row[1], src_row[14]])
+            import_merge_ignore.append([src_row[15], src_row[1], src_row[14]])
         # Delete Check
         if 'del' in src_row[0].lower():
             import_delete.append([src_row[15], src_row[1], src_row[14]])
@@ -404,7 +490,8 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
                                              src_row[14].strip(),
                                              temp_dict_override_to_blank])
     return import_add, import_merge, import_delete, import_override, \
-           import_override_to_blank
+           import_override_to_blank, import_merge_dup, import_merge_leaf, \
+           import_merge_ignore
 
 
 def main_phase_one(views, src_ws, ea_path, ddi_path):
@@ -432,7 +519,7 @@ def main_phase_one(views, src_ws, ea_path, ddi_path):
     views_index = _get_view_index(views, ddi_data)
     ddi_data = _get_rekey_ddi_data(ddi_data, key="_ref")
     with open(ea_path, 'rb') as file_in:  # API data from DDI EA-Attributes
-        ea_index = _get_ea_index(pickle.load(file_in))
+        ea_index = _get_ea_index()
     src_n_rows = src_ws.nrows
 
     return _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data)
@@ -612,6 +699,9 @@ def main():
     ddi_data_file = os.path.join(raw_data_path, 'ddi_data.pkl')
     add_file = os.path.join(reports_data_path, 'Add Import.csv')
     merge_file = os.path.join(reports_data_path, 'Merge Import.csv')
+    dup_file = os.path.join(reports_data_path, 'Merge Dup Import.csv')
+    leaf_file = os.path.join(reports_data_path, 'Merge Leaf Import.csv')
+    ignore_file = os.path.join(reports_data_path, 'Merge Ignore Import.csv')
     delete_file = os.path.join(reports_data_path, 'Delete Import.csv')
     override_file = os.path.join(reports_data_path, 'Override Import.csv')
     override_to_blank_file = os.path.join(reports_data_path,
@@ -631,7 +721,7 @@ def main():
         get_ddi_ip_data(views, ea_data_file, ddi_data_file, logger)
 
     # Building data sets for in preparation for writing.
-    add, merge, delete, override, override_blanks = \
+    add, merge, delete, override, override_blanks, dup, leaf, ignore = \
         main_phase_one(views, src_ws, ea_data_file, ddi_data_file)
 
     # Send data off to be written.
@@ -647,6 +737,12 @@ def main():
     if override_blanks:
         _write_output_for_override_blanks_csv(override_blanks,
                                               override_to_blank_file)
+    if dup:
+        _write_output_for_merge_dup_csv(dup, dup_file)
+    if leaf:
+        _write_output_for_merge_leaf_csv(leaf, leaf_file)
+    if ignore:
+        _write_output_for_merge_ignore_csv(ignore, ignore_file)
 
 
 if __name__ == '__main__':

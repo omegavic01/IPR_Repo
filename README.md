@@ -91,7 +91,7 @@ ipr\_format\_ddi.py
 -   Temp File: DDI\_IPR\_Unsorted.xlsx
 -   Output File: DDI\_IPR\_Sorted.xlsx
 
-Special Note: If new EA's are generated.  This is the script to update!
+Special Note: If new EA's are renamed.  This is the script to update!
 
 Summary: This is the script that takes in the ddi data previously
 received. It then converts, mashes, separates, and sorts the ddi data and
@@ -151,9 +151,20 @@ ipr_diff_to_ddi_import.py
 ----------------------
 
 -   Input File: Potential Updates for DDI.xlsx
+
++   Potential Output File based on results.
 -   Output File: Merge Import.csv
 -   Output File: Override Import.csv
 -   Output File: Override to Delete Cells Import.csv
+-   Output File: Add Import.csv
+-   Output File: Delete Import.csv
+-   Output File: Merge Dup Import.csv
+-   Output File: Merge Leaf Import.csv
+-   Output File: Merge Ignore Import.csv
+
+Additional Features: If the following has been added in the dispostion field of
+the IPR sheet.  [add, del, ignore, dup, leaf]  This script will run a seperate
+function and create separate import sheets for each.
 
 Summary:  For the first run of this script you will want to update ddi_api_call
  value to True.  This will take the network views from the input file and query
