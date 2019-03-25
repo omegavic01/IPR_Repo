@@ -32,7 +32,7 @@ def main():
     ipr_src_file = os.path.join(interim_data_path,
                                 'DDI_to_IPR_03152019.xlsx')
     ipr_src_mod_file = os.path.join(interim_data_path,
-                                    'DDI_to_IPR_03152019-mod (1).xlsx')
+                                    'DDI_to_IPR_03152019-MODje-2.xlsx')
     output_file = os.path.join(processed_data_path,
                                'Potential Updates for DDI.xlsx')
 
@@ -59,8 +59,8 @@ def main():
     for enum, ipr_mod_row in enumerate(ipr_mod_data):
         if ipr_mod_row[0] == 'self-overlap':
             continue
-        if ipr_mod_row[0] == 'del':
-            continue
+        # if ipr_mod_row[0] == 'del':
+        #    continue
         if enum == 0:
             continue
         if ipr_mod_row not in ipr_data:

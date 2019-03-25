@@ -219,7 +219,7 @@ def get_views():
         for key in raw_view.keys():
             if key == 'name':
                 views.append(raw_view[key])
-    views = ['UNO']  # Instead of pulling all views.
+    # views = ['UNO']  # Instead of pulling all views.
     return views
 
 
