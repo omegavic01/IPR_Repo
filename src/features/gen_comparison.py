@@ -1,0 +1,77 @@
+import os
+import logging
+from xlrd import open_workbook
+from openpyxl import Workbook
+from dotenv import find_dotenv, load_dotenv
+
+
+def main():
+    """Script that takes in two .xlsx files in IPR format.  Performs a diff
+    against them and generates an output .xlsx file."""
+    logger = logging.getLogger('ipr_ddi_to_ddi_diff.py')
+    logger.info('Beginning of Script')
+    logger.info('Building Paths and Filenames')
+    # Build path's.
+    interim_data_path = os.path.join(PROJECT_DIR, 'data', 'interim')
+    processed_data_path = os.path.join(PROJECT_DIR, 'data', 'processed')
+
+    # Join file names to path's.
+    ipr_src_file = os.path.join(interim_data_path,
+                                'DDI_to_IPR.xlsx')
+    ipr_src_mod_file = os.path.join(interim_data_path,
+                                    'Copy of OMG Consolidated and formatted (+1).xlsx')
+    output_file = os.path.join(processed_data_path,
+                               'Potential Updates for DDI.xlsx')
+
+    logger.info('Loading Data')
+    # Original Dataset
+    ipr = open_workbook(ipr_src_file)
+    ipr_sheet = ipr.sheet_by_index(1)
+    # Modified Dataset
+    ipr_mod = open_workbook(ipr_src_mod_file)
+    ipr_mod_sheet = ipr_mod.sheet_by_index(0)
+
+    # Add Datasets to a python list.
+    updatelist = []
+    updatelist.append(HEADER_ROW[0:17])
+    ipr_data = []
+    ipr_mod_data = []
+    for enum in range(ipr_sheet.nrows):
+        ipr_tup = (ipr_sheet.row_values(enum)[1].strip(),
+                   ipr_sheet.row_values(enum)[8].strip())
+        ipr_data.append(ipr_tup)
+    for enum in range(ipr_mod_sheet.nrows):
+        mod_tup = (ipr_mod_sheet.row_values(enum)[1].strip(),
+                   ipr_mod_sheet.row_values(enum)[8].strip())
+        ipr_mod_data.append(mod_tup)
+
+    logger.info('Building Diff List from modified file.')
+    # Build Diff List for processing.
+    for enum, ipr_mod_row in enumerate(ipr_mod_data):
+        if enum == 0:
+            continue
+        if ipr_mod_row in ipr_data:
+            updatelist.append(ipr_mod_sheet.rowipr_mod_row)
+            continue
+    logger.info('Writing output.')
+    logger.info('Script Complete')
+
+
+if __name__ == '__main__':
+    # getting root directory
+    PROJECT_DIR = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
+
+    # setup logger
+    LOG_FMT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    logging.basicConfig(level=logging.INFO, format=LOG_FMT)
+
+    # find .env automatically by walking up directories until it's found
+    DOTENV_PATH = find_dotenv()
+
+    # load up the entries as environment variables
+    load_dotenv(DOTENV_PATH)
+
+    # Headerrow for IPR Output
+    HEADER_ROW = os.environ.get("IPR_HEADER_ROW").split(',')
+
+    main()
