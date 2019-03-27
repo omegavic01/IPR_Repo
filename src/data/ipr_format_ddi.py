@@ -164,10 +164,13 @@ def _filter_data(file):
                 'Filt-Leaf': [],
                 'Filt-Dup': [],
                 'Filt-Ignore': [],
-                'Filt-Divest': []}
+                'Filt-Uncategorized': [],
+                'Filt-Divest': [],
+                'Full-Dataset': []}
     for i in range(rddifirst_sheet.nrows):
         if i == 0:
             continue
+        ddi_dict['Full-Dataset'].append(rddifirst_sheet.row_values(i))
         if '/32' in rddifirst_sheet.row_values(i)[2]:
             ddi_dict['Filt-Cidr-32'].append(rddifirst_sheet.row_values(i))
             continue
@@ -215,6 +218,9 @@ def _filter_data(file):
         if IPv4Network(rddifirst_sheet.row_values(i)[1]).is_private or \
                 IPv4Network(rddifirst_sheet.row_values(i)[1]).is_cgn:
             ddi_dict['MASTER'].append(rddifirst_sheet.row_values(i))
+        else:
+            ddi_dict['Filt-Uncategorized'].append(rddifirst_sheet.
+                                                  row_values(i))
     return ddi_dict
 
 
