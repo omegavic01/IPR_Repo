@@ -111,7 +111,9 @@ def _wr_out_conflict(master_ws, conflict_dicts, cidr_set):
     conflict_col = 25
     index_col = 22
     master_rows = list(master_ws.rows)
-    master_ws.cell(row=1, column=conflict_col, value='Conflict Subnet')
+    master_ws.cell(row=1,
+                   column=conflict_col,
+                   value='Conflict Subnet - Index No.')
     for index, item in enumerate(cidr_set):
         if item in conflict_dicts:
             if len(conflict_dicts[item]) > 1:
@@ -133,8 +135,9 @@ def _wr_out_conflict(master_ws, conflict_dicts, cidr_set):
 
 def _wr_out_overlap(master_ws, dict_of_overlaps, cidr_set):
     overlap_col = 24
-    master_ws.cell(row=1, column=overlap_col,
-                   value='Subnet Overlap - Index No.')
+    master_ws.cell(row=1,
+                   column=overlap_col,
+                   value='Conflict Subnet Overlap - Index No.')
     for index, item in enumerate(cidr_set):
         for key in dict_of_overlaps:
             if key != item:

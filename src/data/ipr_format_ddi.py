@@ -98,7 +98,7 @@ def _write_output_to_master(idx, ddi_dic, path):
                 idx['Interface Name']])
             w_s.cell(row=row, column=15, value=bit[0])  # ddi_type
             w_s.cell(row=row, column=16, value=bit[4])  # ddi_view
-            w_s.cell(row=row, column=17, value='DDI')
+            w_s.cell(row=row, column=17, value=bit[idx['IPR D']])
             mycell = w_s.cell(row=row, column=18)
             mycell.alignment = Alignment(horizontal='left')
             mycell.value = int(bit[3].split('.')[0])  # 1st octet
@@ -161,12 +161,24 @@ def _filter_data(file):
                 'Filt-Public-ip-View': [],
                 'Filt-Wan_test-View': [],
                 'Filt-OMC-IT-Parent-Subnet': [],
-                'Filt-MStar': []}
+                'Filt-Leaf': [],
+                'Filt-Dup': [],
+                'Filt-Ignore': [],
+                'Filt-Divest': []}
     for i in range(rddifirst_sheet.nrows):
         if i == 0:
             continue
         if '/32' in rddifirst_sheet.row_values(i)[2]:
             ddi_dict['Filt-Cidr-32'].append(rddifirst_sheet.row_values(i))
+            continue
+        if 'leaf' in rddifirst_sheet.row_values(i)[20]:
+            ddi_dict['Filt-Leaf'].append(rddifirst_sheet.row_values(i))
+            continue
+        if 'dup' in rddifirst_sheet.row_values(i)[20]:
+            ddi_dict['Filt-Dup'].append(rddifirst_sheet.row_values(i))
+            continue
+        if 'ignore' in rddifirst_sheet.row_values(i)[20]:
+            ddi_dict['Filt-Ignore'].append(rddifirst_sheet.row_values(i))
             continue
         if '100.88.0.0/29' in rddifirst_sheet.row_values(i)[3]:
             ddi_dict['Filt-100.88-Cidr-29'].\
@@ -190,13 +202,15 @@ def _filter_data(file):
                 append(rddifirst_sheet.row_values(i))
             continue
         if rddifirst_sheet.row_values(i)[4] == 'Public-IP':
-            ddi_dict['Filt-Public-ip-View'].append(rddifirst_sheet.row_values(i))
+            ddi_dict['Filt-Public-ip-View'].\
+                append(rddifirst_sheet.row_values(i))
             continue
-        if '00470' in rddifirst_sheet.row_values(i)[4]:
-            ddi_dict['Filt-MStar'].append(rddifirst_sheet.row_values(i))
+        if rddifirst_sheet.row_values(i)[20].strip() == 'divest':
+            ddi_dict['Filt-Divest'].append(rddifirst_sheet.row_values(i))
             continue
         if rddifirst_sheet.row_values(i)[4] == 'wan_test':
-            ddi_dict['Filt-Wan_test-View'].append(rddifirst_sheet.row_values(i))
+            ddi_dict['Filt-Wan_test-View'].\
+                append(rddifirst_sheet.row_values(i))
             continue
         if IPv4Network(rddifirst_sheet.row_values(i)[1]).is_private or \
                 IPv4Network(rddifirst_sheet.row_values(i)[1]).is_cgn:
@@ -218,7 +232,8 @@ def _build_header_ea_index(header, e_att):
         header[9]: eatts.index('Requester Email'),
         header[10]: eatts.index('Agency'),
         header[11]: eatts.index('VLAN Description'),
-        header[13]: eatts.index('Interface Name')
+        header[13]: eatts.index('Interface Name'),
+        header[16]: eatts.index('IPR Designation')
         }
     return ea_idx_dict
 

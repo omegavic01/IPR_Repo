@@ -30,12 +30,13 @@ def _write_output_for_add_csv(data, ea_path, file):
     """
     This function writes out a .csv file for an import type: add.
     """
-    with open(ea_path, 'rb') as file_in:  # API data from DDI EA-Attributes
-        ea_index = _get_ea_index(pickle.load(file_in))
+    ea_index = _get_ea_index()
     with open(file, 'w', encoding='utf-8', newline='') as csvfile:
         file_write = csv.writer(csvfile, delimiter='\t')
         for stuff in data:
             # Initial Row fields built
+            if stuff[16] == 'DDI':
+                stuff[16] = ''
             temp_data = [stuff[14],
                          stuff[1].split('/')[0],
                          stuff[1].split('/')[1],
@@ -180,6 +181,38 @@ def _write_output_for_merge_leaf_csv(data, file):
                                      stuff[1].split('/')[1],
                                      stuff[0],
                                      'leaf'])
+
+
+def _write_output_for_merge_divest_csv(data, file):
+    """
+    This function writes out a .csv file for an import type: merge.
+    """
+    with open(file, 'w', encoding='utf-8', newline='') as csvfile:
+        file_write = csv.writer(csvfile, delimiter='\t')
+        for stuff in data:
+            if 'network' in stuff:
+                file_write.writerow(['header-network',
+                                     'address*',
+                                     'netmask*',
+                                     'network_view',
+                                     'EA-IPR Designation'])
+                file_write.writerow([stuff[2],
+                                     stuff[1].split('/')[0],
+                                     cidr_to_netmask(stuff[1].
+                                                     split('/')[1]),
+                                     stuff[0],
+                                     'divest'])
+            if 'networkcontainer' in stuff:
+                file_write.writerow(['header-networkcontainer',
+                                     'address*',
+                                     'netmask*',
+                                     'network_view',
+                                     'EA-IPR Designation'])
+                file_write.writerow([stuff[2],
+                                     stuff[1].split('/')[0],
+                                     stuff[1].split('/')[1],
+                                     stuff[0],
+                                     'divest'])
 
 
 def _write_output_for_merge_ignore_csv(data, file):
@@ -377,12 +410,12 @@ def _get_ea_index():
     Manually build index table for the ea att's.  The index number is
     the value associated to the ea from the update data.  If an EA has been
     renamed in IB.  An update will be required here. If an EA has had its name
-    changed an update will be required here. Final output is a dict.
+    added to Master an update will be required here. Final output is a dict.
     """
     ea_index_temp = {'Address': 5, 'Agency': 10, 'City': 4, 'Country': 3,
                      'Datacenter': 7, 'Division': 8, 'Interface Name': 13,
                      'Region_List': 2, 'Requester Email': 9, 'Site': 6,
-                     'VLAN Description': 11}
+                     'VLAN Description': 11, 'IPR Designation': 16}
     return ea_index_temp
 
 
@@ -412,6 +445,7 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
     """
     import_add = []
     import_merge_leaf = []
+    import_merge_divest = []
     import_merge_dup = []
     import_merge_ignore = []
     import_merge = []
@@ -424,25 +458,44 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
         src_row = src_ws.row_values(idx)
         # Add Check.
         if 'add' in src_row[0].lower():
-            import_add.append(src_row)
+            if src_row[1].strip() in ddi_data[views_index[src_row[15]]]:
+                continue
+            else:
+                import_add.append(src_row)
+                continue
+        # Check to see if network is in ddi data.
+        if src_row[1].strip() in ddi_data[views_index[src_row[15]]]:
+            ddi = ddi_data[views_index[src_row[15]]][src_row[1].strip()]
+        else:
             continue
-        ddi = ddi_data[views_index[src_row[15]]][src_row[1].strip()]
+        # ddi = ddi_data[views_index[src_row[15]]][src_row[1].strip()]
 
         temp_dict_merge = {}
         temp_dict_override = {}
         temp_dict_override_to_blank = {}
-        # dup Check in disposition
-        if 'dup' in src_row[0].lower():
-            import_merge_dup.append([src_row[15], src_row[1], src_row[14]])
-        # leaf Check in disposition
-        if 'leaf' in src_row[0].lower():
-            import_merge_leaf.append([src_row[15], src_row[1], src_row[14]])
-        # ignore Check in disposition
-        if 'ignore' in src_row[0].lower():
-            import_merge_ignore.append([src_row[15], src_row[1], src_row[14]])
-        # Delete Check
-        if 'del' in src_row[0].lower():
+        # delete check
+        if 'del' in src_row[0].lower() and src_row[1] in ddi:
             import_delete.append([src_row[15], src_row[1], src_row[14]])
+            continue
+        # dup Check in disposition
+        if 'dup' == src_row[0].lower() and 'IPR Designation' not in \
+                ddi['extattrs']:
+            import_merge_dup.append([src_row[15], src_row[1], src_row[14]])
+            continue
+        # leaf Check in disposition
+        if 'leaf' == src_row[0].lower() and 'IPR Designation' not in \
+                ddi['extattrs']:
+            import_merge_leaf.append([src_row[15], src_row[1], src_row[14]])
+            continue
+        # leaf Check in disposition
+        if 'divest' == src_row[0].lower() and 'IPR Designation' not in \
+                ddi['extattrs']:
+            import_merge_divest.append([src_row[15], src_row[1], src_row[14]])
+            continue
+        # ignore Check in disposition
+        if 'ignore' == src_row[0].lower() and 'IPR Designation' not in \
+                ddi['extattrs']:
+            import_merge_ignore.append([src_row[15], src_row[1], src_row[14]])
             continue
         # Comment check.
         if 'comment' not in ddi.keys() and src_row[12].strip() == '':
@@ -463,16 +516,16 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
             if ', ,' in src_row[value]:
                 src_row[value] = src_row[value].replace(', ,', ', ')
             if key not in ddi['extattrs'].keys() and \
-                    src_row[value].strip() == '':
+                    src_row[value].strip() in ['', 'DDI']:
                 continue
             elif key not in ddi['extattrs'].keys() and \
-                    src_row[value].strip() != '':
+                    src_row[value].strip() not in ['', 'DDI']:
                 temp_dict_merge.update({key: src_row[value]})
             elif src_row[value].strip() != ddi['extattrs'][key]['value'] and \
-                    src_row[value].strip() != '':
+                    src_row[value].strip() not in ['', 'DDI']:
                 temp_dict_override.update({key: src_row[value]})
             elif src_row[value].strip() != ddi['extattrs'][key]['value'] and \
-                    src_row[value].strip() == '':
+                    src_row[value].strip() not in ['', 'DDI']:
                 temp_dict_override_to_blank.update({key: src_row[value]})
         if temp_dict_merge:
             import_merge.append([src_row[15].strip(),
@@ -491,7 +544,7 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
                                              temp_dict_override_to_blank])
     return import_add, import_merge, import_delete, import_override, \
            import_override_to_blank, import_merge_dup, import_merge_leaf, \
-           import_merge_ignore
+           import_merge_ignore, import_merge_divest
 
 
 def main_phase_one(views, src_ws, ea_path, ddi_path):
@@ -701,6 +754,7 @@ def main():
     merge_file = os.path.join(reports_data_path, 'Merge Import.csv')
     dup_file = os.path.join(reports_data_path, 'Merge Dup Import.csv')
     leaf_file = os.path.join(reports_data_path, 'Merge Leaf Import.csv')
+    divest_file = os.path.join(reports_data_path, 'Merge Divest Import.csv')
     ignore_file = os.path.join(reports_data_path, 'Merge Ignore Import.csv')
     delete_file = os.path.join(reports_data_path, 'Delete Import.csv')
     override_file = os.path.join(reports_data_path, 'Override Import.csv')
@@ -721,7 +775,7 @@ def main():
         get_ddi_ip_data(views, ea_data_file, ddi_data_file, logger)
 
     # Building data sets for in preparation for writing.
-    add, merge, delete, override, override_blanks, dup, leaf, ignore = \
+    add, merge, delete, override, override_blanks, dup, leaf, ignore, divest =\
         main_phase_one(views, src_ws, ea_data_file, ddi_data_file)
 
     # Send data off to be written.
@@ -737,12 +791,15 @@ def main():
     if override_blanks:
         _write_output_for_override_blanks_csv(override_blanks,
                                               override_to_blank_file)
+    # IPR Designation Transition
     if dup:
         _write_output_for_merge_dup_csv(dup, dup_file)
     if leaf:
         _write_output_for_merge_leaf_csv(leaf, leaf_file)
     if ignore:
         _write_output_for_merge_ignore_csv(ignore, ignore_file)
+    if divest:
+        _write_output_for_merge_divest_csv(divest, divest_file)
 
 
 if __name__ == '__main__':
