@@ -172,7 +172,7 @@ Summary:  For the first run of this script you will want to update ddi_api_call
  DDI for its data.  Once done, update the ddi_api_call to False.  Then run the
 script again.  The script will then perform a diff between the raw data and
 the input file.  If there are cells within a row that are different from what
-has been listed from the raw data file.  It'll be stored for the output file
+has been listed from the raw data file.  It'll be stored for an output file
 based on the matching import criteria.  Please refer to the manual for csv
 imports if you have questions on why you would need to do a merge versus
 override import, etc.
