@@ -399,7 +399,7 @@ def _get_view_index(views, ddi_data):
     views_index_temp = {}
     for view in views:
         for enum, ddi_line in enumerate(ddi_data):
-            if view == ddi_line[0]['_ref'].split('/')[3]:
+            if view == ddi_line[0]['network_view']:
                 temp_dict = {view: enum}
                 views_index_temp.update(temp_dict)
     return views_index_temp
@@ -419,12 +419,11 @@ def _get_ea_index():
     return ea_index_temp
 
 
-def _get_rekey_ddi_data(ddi_data, key):
+def _get_rekey_ddi_data(ddi_data):
     """Takes a list of lists of dict's and converts to a list of dict's, of
     dicts.  As well as rekey's the dict's with the network address."""
     for enum, item in enumerate(ddi_data):
-        ddi_data[enum] = dict(("/".join(d[key].partition(':')[2].
-                                        split('/')[0:2]),
+        ddi_data[enum] = dict((d['network'],
                                dict(d, index=index))
                               for (index, d) in enumerate(item))
     return ddi_data
@@ -570,7 +569,7 @@ def main_phase_one(views, src_ws, ea_path, ddi_path):
     with open(ddi_path, 'rb') as file_in:
         ddi_data = pickle.load(file_in)
     views_index = _get_view_index(views, ddi_data)
-    ddi_data = _get_rekey_ddi_data(ddi_data, key="_ref")
+    ddi_data = _get_rekey_ddi_data(ddi_data)
     with open(ea_path, 'rb') as file_in:  # API data from DDI EA-Attributes
         ea_index = _get_ea_index()
     src_n_rows = src_ws.nrows
@@ -590,7 +589,8 @@ def api_call_network_views(view, logger):
     for iview in range(trynetwork):
         try:
             rnet = requests.get(PAYLOAD['url'] + "network?_return_fields="
-                                                 "extattrs,comment&"
+                                                 "extattrs,comment,network,"
+                                                 "network_view,utilization&"
                                                  "network_view=" + view,
                                 "_max_results=-5000",
                                 auth=(PAYLOAD['username'],
@@ -622,7 +622,9 @@ def api_call_networkcontainer_views(view, logger):
         try:
             rnetcont = requests.get(PAYLOAD['url'] + "networkcontainer?"
                                                      "_return_fields=extattrs,"
-                                                     "comment&network_view=" +
+                                                     "comment,utilization,"
+                                                     "network,network_view"
+                                                     "&network_view=" +
                                     view, "_max_results=-5000",
                                     auth=(PAYLOAD['username'],
                                           PAYLOAD['password']),
@@ -747,7 +749,7 @@ def main():
 
     # Build File and File path.
     src_file = os.path.join(processed_data_path,
-                            'Potential Updates for DDI.xlsx')
+                            'ADD Agency - 2019-03-29.xlsx')
     ea_data_file = os.path.join(raw_data_path, 'ea_data.pkl')
     ddi_data_file = os.path.join(raw_data_path, 'ddi_data.pkl')
     add_file = os.path.join(reports_data_path, 'Add Import.csv')
