@@ -90,30 +90,44 @@ def _wr_out_overlap_conflict_tag(master_ws):
     master_rows = list(master_ws.rows)
     no_overlap_col = 26
     no_conflict_col = 27
-    master_ws.cell(row=1, column=no_overlap_col,
+    master_ws.cell(row=1,
+                   column=no_overlap_col,
                    value='No Overlap')
-    master_ws.cell(row=1, column=no_conflict_col,
+    master_ws.cell(row=1,
+                   column=no_conflict_col,
                    value='No Conflict')
     for enum, row in enumerate(master_rows):
         if enum == 0:
             continue
         if row[23].value is not None:
-            master_ws.cell(row=enum + 1, column=no_overlap_col, value='NO')
+            master_ws.cell(row=enum + 1,
+                           column=no_overlap_col,
+                           value='NO')
         else:
-            master_ws.cell(row=enum + 1, column=no_overlap_col, value='YES')
+            master_ws.cell(row=enum + 1,
+                           column=no_overlap_col,
+                           value='YES')
         if row[24].value is not None:
-            master_ws.cell(row=enum + 1, column=no_conflict_col, value='NO')
+            master_ws.cell(row=enum + 1,
+                           column=no_conflict_col,
+                           value='NO')
         else:
-            master_ws.cell(row=enum + 1, column=no_conflict_col, value='YES')
+            master_ws.cell(row=enum + 1,
+                           column=no_conflict_col,
+                           value='YES')
 
 
 def _wr_out_conflict(master_ws, conflict_dicts, cidr_set):
     conflict_col = 25
+    conflict_cnt = 29
     index_col = 22
     master_rows = list(master_ws.rows)
     master_ws.cell(row=1,
                    column=conflict_col,
                    value='Conflict Subnet - Index No.')
+    master_ws.cell(row=1,
+                   column=conflict_cnt,
+                   value='Conflict Subnet - Count')
     for index, item in enumerate(cidr_set):
         if item in conflict_dicts:
             if len(conflict_dicts[item]) > 1:
@@ -125,19 +139,30 @@ def _wr_out_conflict(master_ws, conflict_dicts, cidr_set):
                                                 column=conflict_col)
                         mycell.alignment = Alignment(horizontal='left')
                         mycell.value = int(temp_list[0])
+                        master_ws.cell(row=index + 2,
+                                       column=conflict_cnt,
+                                       value=len(temp_list))
                         continue
                     if len(temp_list) > 1:
-                        master_ws.cell(row=index + 2, column=conflict_col,
+                        master_ws.cell(row=index + 2,
+                                       column=conflict_col,
                                        value=', '.join(str(x) for x in
                                                        temp_list))
+                        master_ws.cell(row=index + 2,
+                                       column=conflict_cnt,
+                                       value=len(temp_list))
                         continue
 
 
 def _wr_out_overlap(master_ws, dict_of_overlaps, cidr_set):
     overlap_col = 24
+    overlap_cnt = 28
     master_ws.cell(row=1,
                    column=overlap_col,
                    value='Conflict Subnet Overlap - Index No.')
+    master_ws.cell(row=1,
+                   column=overlap_cnt,
+                   value='Conflict Subnet Overlap - Count')
     for index, item in enumerate(cidr_set):
         for key in dict_of_overlaps:
             if key != item:
@@ -148,11 +173,17 @@ def _wr_out_overlap(master_ws, dict_of_overlaps, cidr_set):
                 mycell = master_ws.cell(row=index + 2, column=overlap_col)
                 mycell.alignment = Alignment(horizontal='left')
                 mycell.value = int(dict_of_overlaps[key][0])
+                master_ws.cell(row=index+2,
+                               column=overlap_cnt,
+                               value=len(dict_of_overlaps[key]))
                 continue
             if key == item:
                 master_ws.cell(row=index + 2, column=overlap_col,
                                value=', '.join(str(x) for x
                                                in dict_of_overlaps[key]))
+                master_ws.cell(row=index+2,
+                               column=overlap_cnt,
+                               value=len(dict_of_overlaps[key]))
 
 
 def _conflict_overlap_check(interim_file):
