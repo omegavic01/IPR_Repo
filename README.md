@@ -15,7 +15,7 @@ Notes to the reader:
 -   Refer to .env\_template file to update your .env file for your local
     variables such has URL, Username, Password. You can rename
     .env\_template to .env.  The .env file lives in the same directory as
-    .env\_tempalte.
+    .env\_template.
 -   Refer to requirements.txt for the list of python modules used for these
     scripts.
 
