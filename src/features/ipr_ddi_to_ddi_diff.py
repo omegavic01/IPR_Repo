@@ -30,9 +30,9 @@ def main():
 
     # Join file names to path's.
     ipr_src_file = os.path.join(interim_data_path,
-                                'DDI_to_IPR_03152019.xlsx')
+                                'DDI_to_IPR-20190327.xlsx')
     ipr_src_mod_file = os.path.join(interim_data_path,
-                                    'Copy of OMG Consolidated and formatted (+1).xlsx')
+                                    'DDI_to_IPR-20190327-master modded.xlsx')
     output_file = os.path.join(processed_data_path,
                                'Potential Updates for DDI.xlsx')
 
@@ -68,7 +68,7 @@ def main():
             continue
     logger.info('Writing output.')
     _write_output_to_master(updatelist, output_file)
-    logger.info('Script Complete')
+    logger.info('Script Complete: Refer to data\\processed')
 
 
 if __name__ == '__main__':

@@ -26,7 +26,7 @@ def cidr_to_netmask(cidr):
     return netmask
 
 
-def _write_output_for_add_csv(data, ea_path, file):
+def _write_output_for_add_csv(data, file):
     """
     This function writes out a .csv file for an import type: add.
     """
@@ -546,7 +546,7 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
            import_merge_ignore, import_merge_divest
 
 
-def main_phase_one(views, src_ws, ea_path, ddi_path):
+def main_phase_one(views, src_ws, ddi_path):
     """This function uses four other functions in order to index the data for
     performing diff's.  While the last function call performs the action listed
     below.
@@ -570,8 +570,7 @@ def main_phase_one(views, src_ws, ea_path, ddi_path):
         ddi_data = pickle.load(file_in)
     views_index = _get_view_index(views, ddi_data)
     ddi_data = _get_rekey_ddi_data(ddi_data)
-    with open(ea_path, 'rb') as file_in:  # API data from DDI EA-Attributes
-        ea_index = _get_ea_index()
+    ea_index = _get_ea_index()
     src_n_rows = src_ws.nrows
 
     return _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data)
@@ -710,11 +709,10 @@ def get_ddi_ip_data(net_views, ea_path, ddi_path, logger):
     exit()
 
 
-def _get_views(n_col, work_sheet):
+def _get_views(work_sheet):
     """Builds a set list of views from within src_ws"""
-    for i in range(n_col):
-        if 'View' in work_sheet.row_values(0)[i]:
-            view_col = list(set(work_sheet.col_values(i)[1:]))
+    ddi_view_col = work_sheet.row_values(0).index('DDI View')
+    view_col = list(set(work_sheet.col_values(ddi_view_col)[1:]))
     return view_col
 
 
@@ -749,7 +747,7 @@ def main():
 
     # Build File and File path.
     src_file = os.path.join(processed_data_path,
-                            'ADD Agency - 2019-03-29.xlsx')
+                            'Potential Updates for DDI.xlsx')
     ea_data_file = os.path.join(raw_data_path, 'ea_data.pkl')
     ddi_data_file = os.path.join(raw_data_path, 'ddi_data.pkl')
     add_file = os.path.join(reports_data_path, 'Add Import.csv')
@@ -763,12 +761,12 @@ def main():
     override_to_blank_file = os.path.join(reports_data_path,
                                           'Override to Blank Cells Import.csv')
 
-    logger.info('Loading Data')
+    logger.info('Loading Data from source file')
     src_wb = open_workbook(src_file)
     src_ws = src_wb.sheet_by_index(0)
 
-    logger.info('Compiling list of views.')
-    views = _get_views(src_ws.ncols, src_ws)
+    logger.info('Compiling source file list of views.')
+    views = _get_views(src_ws)
 
     # Update to True if a fresh set of data is needed from ddi.
     ddi_api_call = False
@@ -778,12 +776,12 @@ def main():
 
     # Building data sets for in preparation for writing.
     add, merge, delete, override, override_blanks, dup, leaf, ignore, divest =\
-        main_phase_one(views, src_ws, ea_data_file, ddi_data_file)
+        main_phase_one(views, src_ws, ddi_data_file)
 
     # Send data off to be written.
     logger.info('Writing Data.  Please refer to the reports dir.')
     if add:
-        _write_output_for_add_csv(add, ea_data_file, add_file)
+        _write_output_for_add_csv(add, add_file)
     if merge:
         _write_output_for_merge_csv(merge, merge_file)
     if delete:
