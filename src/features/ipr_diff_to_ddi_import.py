@@ -86,13 +86,15 @@ def _write_output_for_merge_csv(data, file):
                                              'address*',
                                              'netmask*',
                                              'network_view',
-                                             'EA-' + item])
+                                             'EA-' + item,
+                                             'EAInherited-' + item])
                         file_write.writerow([stuff[2],
                                              stuff[1].split('/')[0],
                                              cidr_to_netmask(stuff[1].
                                                              split('/')[1]),
                                              stuff[0],
-                                             stuff[3][item]])
+                                             stuff[3][item],
+                                             'OVERRIDE'])
             if 'networkcontainer' in stuff:
                 for item in stuff[3].keys():
                     if item == 'comment':
@@ -111,12 +113,14 @@ def _write_output_for_merge_csv(data, file):
                                              'address*',
                                              'netmask*',
                                              'network_view',
-                                             'EA-' + item])
+                                             'EA-' + item,
+                                             'EAInherited-' + item])
                         file_write.writerow([stuff[2],
                                              stuff[1].split('/')[0],
                                              stuff[1].split('/')[1],
                                              stuff[0],
-                                             stuff[3][item]])
+                                             stuff[3][item],
+                                             'OVERRIDE'])
 
 
 def _write_output_for_merge_dup_csv(data, file):
@@ -301,13 +305,15 @@ def _write_output_for_override_csv(data, file):
                                              'address*',
                                              'netmask*',
                                              'network_view',
-                                             'EA-' + item])
+                                             'EA-' + item,
+                                             'EAInherited-' + item])
                         file_write.writerow([stuff[2],
                                              stuff[1].split('/')[0],
                                              cidr_to_netmask(stuff[1].
                                                              split('/')[1]),
                                              stuff[0],
-                                             stuff[3][item]])
+                                             stuff[3][item],
+                                             'OVERRIDE'])
             if 'networkcontainer' in stuff:
                 for item in stuff[3].keys():
                     if item == 'comment':
@@ -326,12 +332,14 @@ def _write_output_for_override_csv(data, file):
                                              'address*',
                                              'netmask*',
                                              'network_view',
-                                             'EA-' + item])
+                                             'EA-' + item,
+                                             'EAInherited-' + item])
                         file_write.writerow([stuff[2],
                                              stuff[1].split('/')[0],
                                              stuff[1].split('/')[1],
                                              stuff[0],
-                                             stuff[3][item]])
+                                             stuff[3][item],
+                                             'OVERRIDE'])
 
 
 def _write_output_for_override_blanks_csv(data, file):
@@ -360,12 +368,14 @@ def _write_output_for_override_blanks_csv(data, file):
                                              'address*',
                                              'netmask*',
                                              'EA-' + item,
+                                             'EAInherited-' + item,
                                              'network_view'])
                         file_write.writerow([stuff[2],
                                              stuff[1].split('/')[0],
                                              cidr_to_netmask(stuff[1].
                                                              split('/')[1]),
                                              stuff[3][item],
+                                             'OVERRIDE',
                                              stuff[0]])
             if 'networkcontainer' in stuff:
                 for item in stuff[3].keys():
@@ -385,11 +395,13 @@ def _write_output_for_override_blanks_csv(data, file):
                                              'address*',
                                              'netmask*',
                                              'EA-' + item,
+                                             'EAInherited-' + item,
                                              'network_view'])
                         file_write.writerow([stuff[2],
                                              stuff[1].split('/')[0],
                                              stuff[1].split('/')[1],
                                              stuff[3][item],
+                                             'OVERRIDE',
                                              stuff[0]])
 
 
