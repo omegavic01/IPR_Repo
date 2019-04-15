@@ -470,7 +470,7 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
         # Add Check.
         if 'add' in src_row[0].lower():
             if src_row[1].strip() in ddi_data[views_index[src_row[15]]]:
-                continue
+                pass
             else:
                 import_add.append(src_row)
                 continue
@@ -759,7 +759,7 @@ def main():
 
     # Build File and File path.
     src_file = os.path.join(processed_data_path,
-                            'Potential Updates for DDI.xlsx')
+                            'IPR-Network update from Nov 2018 (1).xlsx')
     ea_data_file = os.path.join(raw_data_path, 'ea_data.pkl')
     ddi_data_file = os.path.join(raw_data_path, 'ddi_data.pkl')
     add_file = os.path.join(reports_data_path, 'Add Import.csv')
