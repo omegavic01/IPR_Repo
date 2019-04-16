@@ -253,7 +253,7 @@ def main():
        -- DDI_IPR_Sorted.xlsx
     """
     # get logger
-    logger = logging.getLogger('ddi_to_master.py')
+    logger = logging.getLogger('ipr_format_ddi.py')
     logger.info('Beginning of Script')
     # Build paths and file names.
     raw_data_path = os.path.join(PROJECT_DIR, 'data', 'raw')
