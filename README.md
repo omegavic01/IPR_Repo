@@ -98,7 +98,7 @@ Summary: This is the script that takes in the ddi data previously
 received. It then converts, mashes, separates, and sorts the ddi data and
 generates the output file.
 
-ipr\audit\_ddi.py
+ipr\_audit\_ddi.py
 ----------------
 
 -   Interim File: DDI\_IPR\_Sorted.xlsx
