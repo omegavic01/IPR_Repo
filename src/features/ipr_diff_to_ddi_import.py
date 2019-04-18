@@ -47,13 +47,19 @@ def _write_output_for_add_csv(data, file):
                            'network_view']
             # Check for comments
             if stuff[12]:
-                temp_data.append(stuff[12])
-                temp_header.append('comment')
+                if '\n' in stuff[12]:
+                    temp_data.append(stuff[12].replace('\n', ',').strip(','))
+                    temp_header.append('comment')
+                else:
+                    temp_data.append(stuff[12])
+                    temp_header.append('comment')
             # Check for EA's
             for key in ea_index.keys():
                 if stuff[ea_index[key]]:
                     temp_header.append('EA-'+key)
+                    temp_header.append('EAInherited-'+key)
                     temp_data.append(stuff[ea_index[key]])
+                    temp_data.append('OVERRIDE')
             # Write Header Row on new line.
             file_write.writerow(temp_header)
             # Write data Row on new line.
@@ -485,7 +491,7 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
         temp_dict_override = {}
         temp_dict_override_to_blank = {}
         # delete check
-        if 'del' in src_row[0].lower() and src_row[1] in ddi:
+        if 'del' in src_row[0].lower() and src_row[1] in ddi['network']:
             import_delete.append([src_row[15], src_row[1], src_row[14]])
             continue
         # dup Check in disposition
@@ -759,7 +765,7 @@ def main():
 
     # Build File and File path.
     src_file = os.path.join(processed_data_path,
-                            'IPR-Network update from Nov 2018 (1).xlsx')
+                            'IPR-2019-04-03 Status update_SSch.xlsx')
     ea_data_file = os.path.join(raw_data_path, 'ea_data.pkl')
     ddi_data_file = os.path.join(raw_data_path, 'ddi_data.pkl')
     add_file = os.path.join(reports_data_path, 'Add Import.csv')
