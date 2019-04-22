@@ -156,7 +156,7 @@ def _filter_data(file):
                 'Filt-Cidr-32': [],
                 'Filt-100.88-Cidr-29': [],
                 'Filt-100.64-Cidr-29': [],
-                'Filt-Free-ip-00890': [],
+                'Filt-Free-ip': [],
                 'Filt-Cidr-15-to-Cidr-1': [],
                 'Filt-Public-ip-View': [],
                 'Filt-Wan_test-View': [],
@@ -191,11 +191,11 @@ def _filter_data(file):
             ddi_dict['Filt-100.64-Cidr-29'].\
                 append(rddifirst_sheet.row_values(i))
             continue
-        if 'free ip' in rddifirst_sheet.row_values(i)[5].lower() \
-                and '00890' in rddifirst_sheet.row_values(i)[4]:
-            ddi_dict['Filt-Free-ip-00890'].\
-                append(rddifirst_sheet.row_values(i))
-            continue
+        if 'free ip' in rddifirst_sheet.row_values(i)[5].lower() or \
+            'OPEN' in rddifirst_sheet.row_values(i)[5]:
+                ddi_dict['Filt-Free-ip'].\
+                    append(rddifirst_sheet.row_values(i))
+                continue
         if rddifirst_sheet.row_values(i)[5] in omc_it_parent_list:
             ddi_dict['Filt-OMC-IT-Parent-Subnet'].append(
                 rddifirst_sheet.row_values(i))
