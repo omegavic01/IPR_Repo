@@ -141,24 +141,28 @@ def _write_output_for_merge_dup_csv(data, file):
                                      'address*',
                                      'netmask*',
                                      'network_view',
-                                     'EA-IPR Designation'])
+                                     'EA-IPR Designation',
+                                     'EAInherited-IPR Designation'])
                 file_write.writerow([stuff[2],
                                      stuff[1].split('/')[0],
                                      cidr_to_netmask(stuff[1].
                                                      split('/')[1]),
                                      stuff[0],
-                                     'dup'])
+                                     'dup',
+                                     'OVERRIDE'])
             if 'networkcontainer' in stuff:
                 file_write.writerow(['header-networkcontainer',
                                      'address*',
                                      'netmask*',
                                      'network_view',
-                                     'EA-IPR Designation'])
+                                     'EA-IPR Designation',
+                                     'EAInherited-IPR Designation'])
                 file_write.writerow([stuff[2],
                                      stuff[1].split('/')[0],
                                      stuff[1].split('/')[1],
                                      stuff[0],
-                                     'dup'])
+                                     'dup',
+                                     'OVERRIDE'])
 
 
 def _write_output_for_merge_leaf_csv(data, file):
@@ -173,24 +177,28 @@ def _write_output_for_merge_leaf_csv(data, file):
                                      'address*',
                                      'netmask*',
                                      'network_view',
-                                     'EA-IPR Designation'])
+                                     'EA-IPR Designation',
+                                     'EAInherited-IPR Designation'])
                 file_write.writerow([stuff[2],
                                      stuff[1].split('/')[0],
                                      cidr_to_netmask(stuff[1].
                                                      split('/')[1]),
                                      stuff[0],
-                                     'leaf'])
+                                     'leaf',
+                                     'OVERRIDE'])
             if 'networkcontainer' in stuff:
                 file_write.writerow(['header-networkcontainer',
                                      'address*',
                                      'netmask*',
                                      'network_view',
-                                     'EA-IPR Designation'])
+                                     'EA-IPR Designation',
+                                     'EAInherited-IPR Designation'])
                 file_write.writerow([stuff[2],
                                      stuff[1].split('/')[0],
                                      stuff[1].split('/')[1],
                                      stuff[0],
-                                     'leaf'])
+                                     'leaf',
+                                     'OVERRIDE'])
 
 
 def _write_output_for_merge_divest_csv(data, file):
@@ -205,24 +213,28 @@ def _write_output_for_merge_divest_csv(data, file):
                                      'address*',
                                      'netmask*',
                                      'network_view',
-                                     'EA-IPR Designation'])
+                                     'EA-IPR Designation',
+                                     'EAInherited-IPR Designation'])
                 file_write.writerow([stuff[2],
                                      stuff[1].split('/')[0],
                                      cidr_to_netmask(stuff[1].
                                                      split('/')[1]),
                                      stuff[0],
-                                     'divest'])
+                                     'divest',
+                                     'OVERRIDE'])
             if 'networkcontainer' in stuff:
                 file_write.writerow(['header-networkcontainer',
                                      'address*',
                                      'netmask*',
                                      'network_view',
-                                     'EA-IPR Designation'])
+                                     'EA-IPR Designation,'
+                                     'EAInherited-IPR Designation'])
                 file_write.writerow([stuff[2],
                                      stuff[1].split('/')[0],
                                      stuff[1].split('/')[1],
                                      stuff[0],
-                                     'divest'])
+                                     'divest',
+                                     'OVERRIDE'])
 
 
 def _write_output_for_merge_ignore_csv(data, file):
@@ -237,24 +249,100 @@ def _write_output_for_merge_ignore_csv(data, file):
                                      'address*',
                                      'netmask*',
                                      'network_view',
-                                     'EA-IPR Designation'])
+                                     'EA-IPR Designation',
+                                     'EAInherited-IPR Designation'])
                 file_write.writerow([stuff[2],
                                      stuff[1].split('/')[0],
                                      cidr_to_netmask(stuff[1].
                                                      split('/')[1]),
                                      stuff[0],
-                                     'ignore'])
+                                     'ignore',
+                                     'OVERRIDE'])
             if 'networkcontainer' in stuff:
                 file_write.writerow(['header-networkcontainer',
                                      'address*',
                                      'netmask*',
                                      'network_view',
-                                     'EA-IPR Designation'])
+                                     'EA-IPR Designation',
+                                     'EAInherited-IPR Designation'])
                 file_write.writerow([stuff[2],
                                      stuff[1].split('/')[0],
                                      stuff[1].split('/')[1],
                                      stuff[0],
-                                     'ignore'])
+                                     'ignore',
+                                     'OVERRIDE'])
+
+
+def _write_output_for_merge_re_ip_csv(data, file):
+    """
+    This function writes out a .csv file for an import type: merge.
+    """
+    with open(file, 'w', encoding='utf-8', newline='') as csvfile:
+        file_write = csv.writer(csvfile, delimiter='\t')
+        for stuff in data:
+            if 'network' in stuff:
+                file_write.writerow(['header-network',
+                                     'address*',
+                                     'netmask*',
+                                     'network_view',
+                                     'EA-IPR Designation',
+                                     'EAInherited-IPR Designation'])
+                file_write.writerow([stuff[2],
+                                     stuff[1].split('/')[0],
+                                     cidr_to_netmask(stuff[1].
+                                                     split('/')[1]),
+                                     stuff[0],
+                                     're-ip',
+                                     'OVERRIDE'])
+            if 'networkcontainer' in stuff:
+                file_write.writerow(['header-networkcontainer',
+                                     'address*',
+                                     'netmask*',
+                                     'network_view',
+                                     'EA-IPR Designation',
+                                     'EAInherited-IPR Designation'])
+                file_write.writerow([stuff[2],
+                                     stuff[1].split('/')[0],
+                                     stuff[1].split('/')[1],
+                                     stuff[0],
+                                     're-ip',
+                                     'OVERRIDE'])
+
+
+def _write_output_for_merge_drop_reserve_csv(data, file):
+    """
+    This function writes out a .csv file for an import type: merge.
+    """
+    with open(file, 'w', encoding='utf-8', newline='') as csvfile:
+        file_write = csv.writer(csvfile, delimiter='\t')
+        for stuff in data:
+            if 'network' in stuff:
+                file_write.writerow(['header-network',
+                                     'address*',
+                                     'netmask*',
+                                     'network_view',
+                                     'EA-IPR Designation',
+                                     'EAInherited-IPR Designation'])
+                file_write.writerow([stuff[2],
+                                     stuff[1].split('/')[0],
+                                     cidr_to_netmask(stuff[1].
+                                                     split('/')[1]),
+                                     stuff[0],
+                                     'drop reserve',
+                                     'OVERRIDE'])
+            if 'networkcontainer' in stuff:
+                file_write.writerow(['header-networkcontainer',
+                                     'address*',
+                                     'netmask*',
+                                     'network_view',
+                                     'EA-IPR Designation',
+                                     'EAInherited-IPR Designation'])
+                file_write.writerow([stuff[2],
+                                     stuff[1].split('/')[0],
+                                     stuff[1].split('/')[1],
+                                     stuff[0],
+                                     'drop reserve',
+                                     'OVERRIDE'])
 
 
 def _write_output_for_delete_csv(data, file):
@@ -465,6 +553,8 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
     import_merge_divest = []
     import_merge_dup = []
     import_merge_ignore = []
+    import_merge_re_ip = []
+    import_merge_drop_reserve = []
     import_merge = []
     import_delete = []
     import_override = []
@@ -514,6 +604,18 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
                 ddi['extattrs']:
             import_merge_ignore.append([src_row[15], src_row[1], src_row[14]])
             continue
+        # RE-ip Check in disposition
+        if 're-ip' == src_row[0].lower() and 'IPR Designation' not in \
+                ddi['extattrs']:
+            import_merge_re_ip.append([src_row[15], src_row[1], src_row[14]])
+            continue
+        # drop reserve Check in disposition
+        if 'drop reserve' == src_row[0].lower() and 'IPR Designation' not in \
+                ddi['extattrs']:
+            import_merge_drop_reserve.append([src_row[15],
+                                              src_row[1],
+                                              src_row[14]])
+            continue
         # Comment check.
         if 'comment' not in ddi.keys() and src_row[12].strip() == '':
             pass
@@ -561,7 +663,8 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
                                              temp_dict_override_to_blank])
     return import_add, import_merge, import_delete, import_override, \
            import_override_to_blank, import_merge_dup, import_merge_leaf, \
-           import_merge_ignore, import_merge_divest
+           import_merge_ignore, import_merge_re_ip, import_merge_drop_reserve,\
+           import_merge_divest
 
 
 def main_phase_one(views, src_ws, ddi_path):
@@ -765,7 +868,7 @@ def main():
 
     # Build File and File path.
     src_file = os.path.join(processed_data_path,
-                            'IPR-2019-04-03 Status update_SSch.xlsx')
+                            'Potential Updates for DDI.xlsx')
     ea_data_file = os.path.join(raw_data_path, 'ea_data.pkl')
     ddi_data_file = os.path.join(raw_data_path, 'ddi_data.pkl')
     add_file = os.path.join(reports_data_path, 'Add Import.csv')
@@ -774,6 +877,9 @@ def main():
     leaf_file = os.path.join(reports_data_path, 'Merge Leaf Import.csv')
     divest_file = os.path.join(reports_data_path, 'Merge Divest Import.csv')
     ignore_file = os.path.join(reports_data_path, 'Merge Ignore Import.csv')
+    re_ip_file = os.path.join(reports_data_path, 'Merge Re-IP Import.csv')
+    drop_reserve_file = os.path.join(reports_data_path,
+                                     'Merge drop_reserve Import.csv')
     delete_file = os.path.join(reports_data_path, 'Delete Import.csv')
     override_file = os.path.join(reports_data_path, 'Override Import.csv')
     override_to_blank_file = os.path.join(reports_data_path,
@@ -793,8 +899,8 @@ def main():
         get_ddi_ip_data(views, ea_data_file, ddi_data_file, logger)
 
     # Building data sets for in preparation for writing.
-    add, merge, delete, override, override_blanks, dup, leaf, ignore, divest =\
-        main_phase_one(views, src_ws, ddi_data_file)
+    add, merge, delete, override, override_blanks, dup, leaf, ignore, re_ip,\
+    drop_reserve, divest = main_phase_one(views, src_ws, ddi_data_file)
 
     # Send data off to be written.
     logger.info('Writing Data.  Please refer to the reports dir.')
@@ -816,6 +922,11 @@ def main():
         _write_output_for_merge_leaf_csv(leaf, leaf_file)
     if ignore:
         _write_output_for_merge_ignore_csv(ignore, ignore_file)
+    if re_ip:
+        _write_output_for_merge_re_ip_csv(re_ip, re_ip_file)
+    if drop_reserve:
+        _write_output_for_merge_drop_reserve_csv(drop_reserve,
+                                                 drop_reserve_file)
     if divest:
         _write_output_for_merge_divest_csv(divest, divest_file)
 
