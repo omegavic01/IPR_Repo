@@ -77,7 +77,6 @@ target/
 
 # exclude data from source control by default
 data/interim/*.*
-reports/figures/*.*
 reports/Old_Data/*.*
 data/processed/*.*
 data/interim/Old Updates/*.*
@@ -86,6 +85,7 @@ data/processed/Old Data/*.*
 data/raw/*.*
 data/*.*
 reports/*.*
+src/data/*.txt
 
 # Mac OS-specific storage files
 .DS_Store
@@ -100,6 +100,7 @@ reports/*.*
 # Unused Folders
 /docs
 /models
+/reports/figures
 /notebooks
 /references
 /src/models
