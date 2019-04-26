@@ -86,6 +86,9 @@ data/raw/*.*
 data/*.*
 reports/*.*
 src/data/*.txt
+src/features/*.txt
+src/data/*.ipynb
+src/features/*.ipynb
 
 # Mac OS-specific storage files
 .DS_Store
