@@ -34,36 +34,69 @@ def _write_output_for_add_csv(data, file):
     with open(file, 'w', encoding='utf-8', newline='') as csvfile:
         file_write = csv.writer(csvfile, delimiter='\t')
         for stuff in data:
-            # Initial Row fields built
-            if stuff[16] == 'DDI':
-                stuff[16] = ''
-            temp_data = [stuff[14],
-                         stuff[1].split('/')[0],
-                         stuff[1].split('/')[1],
-                         stuff[15]]
-            temp_header = ['header-networkcontainer',
-                           'address*',
-                           'netmask*',
-                           'network_view']
-            # Check for comments
-            if stuff[12]:
-                if '\n' in stuff[12]:
-                    temp_data.append(stuff[12].replace('\n', ',').strip(','))
-                    temp_header.append('comment')
-                else:
-                    temp_data.append(stuff[12])
-                    temp_header.append('comment')
-            # Check for EA's
-            for key in ea_index.keys():
-                if stuff[ea_index[key]]:
-                    temp_header.append('EA-'+key)
-                    temp_header.append('EAInherited-'+key)
-                    temp_data.append(stuff[ea_index[key]])
-                    temp_data.append('OVERRIDE')
-            # Write Header Row on new line.
-            file_write.writerow(temp_header)
-            # Write data Row on new line.
-            file_write.writerow(temp_data)
+            if 'networkcontainer' in stuff:
+                # Initial Row fields built
+                if stuff[16] == 'DDI':
+                    stuff[16] = ''
+                temp_data = [stuff[14],
+                             stuff[1].split('/')[0],
+                             stuff[1].split('/')[1],
+                             stuff[15]]
+                temp_header = ['header-networkcontainer',
+                               'address*',
+                               'netmask*',
+                               'network_view']
+                # Check for comments
+                if stuff[12]:
+                    if '\n' in stuff[12]:
+                        temp_data.append(stuff[12].replace('\n', ',').strip(','))
+                        temp_header.append('comment')
+                    else:
+                        temp_data.append(stuff[12])
+                        temp_header.append('comment')
+                # Check for EA's
+                for key in ea_index.keys():
+                    if stuff[ea_index[key]]:
+                        temp_header.append('EA-'+key)
+                        temp_header.append('EAInherited-'+key)
+                        temp_data.append(stuff[ea_index[key]])
+                        temp_data.append('OVERRIDE')
+                # Write Header Row on new line.
+                file_write.writerow(temp_header)
+                # Write data Row on new line.
+                file_write.writerow(temp_data)
+            if 'network' in stuff:
+                # Initial Row fields built
+                if stuff[16] == 'DDI':
+                    stuff[16] = ''
+                temp_data = [stuff[14],
+                             stuff[1].split('/')[0],
+                             cidr_to_netmask(stuff[1].
+                                             split('/')[1]),
+                             stuff[15]]
+                temp_header = ['header-network',
+                               'address*',
+                               'netmask*',
+                               'network_view']
+                # Check for comments
+                if stuff[12]:
+                    if '\n' in stuff[12]:
+                        temp_data.append(stuff[12].replace('\n', ',').strip(','))
+                        temp_header.append('comment')
+                    else:
+                        temp_data.append(stuff[12])
+                        temp_header.append('comment')
+                # Check for EA's
+                for key in ea_index.keys():
+                    if stuff[ea_index[key]]:
+                        temp_header.append('EA-'+key)
+                        temp_header.append('EAInherited-'+key)
+                        temp_data.append(stuff[ea_index[key]])
+                        temp_data.append('OVERRIDE')
+                # Write Header Row on new line.
+                file_write.writerow(temp_header)
+                # Write data Row on new line.
+                file_write.writerow(temp_data)
 
 
 def _write_output_for_merge_csv(data, file):
