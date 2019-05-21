@@ -260,7 +260,7 @@ def _write_output_for_merge_divest_csv(data, file):
                                      'address*',
                                      'netmask*',
                                      'network_view',
-                                     'EA-IPR Designation,'
+                                     'EA-IPR Designation',
                                      'EAInherited-IPR Designation'])
                 file_write.writerow([stuff[2],
                                      stuff[1].split('/')[0],

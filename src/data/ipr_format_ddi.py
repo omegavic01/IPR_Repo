@@ -166,7 +166,9 @@ def _filter_data(file):
                 'Filt-Ignore': [],
                 'Filt-Uncategorized': [],
                 'Filt-Divest': [],
-                'Full-Dataset': []}
+                'Full-Dataset': [],
+                'Filt-Re-IP': [],
+                'Filt-Drop Reserve': []}
     for i in range(rddifirst_sheet.nrows):
         if i == 0:
             continue
@@ -182,6 +184,12 @@ def _filter_data(file):
             continue
         if 'ignore' in rddifirst_sheet.row_values(i)[20]:
             ddi_dict['Filt-Ignore'].append(rddifirst_sheet.row_values(i))
+            continue
+        if 're-ip' in rddifirst_sheet.row_values(i)[20]:
+            ddi_dict['Filt-Re-IP'].append(rddifirst_sheet.row_values(i))
+            continue
+        if 'drop reserve' in rddifirst_sheet.row_values(i)[20]:
+            ddi_dict['Filt-Re-IP'].append(rddifirst_sheet.row_values(i))
             continue
         if '100.88.0.0/29' in rddifirst_sheet.row_values(i)[3]:
             ddi_dict['Filt-100.88-Cidr-29'].\

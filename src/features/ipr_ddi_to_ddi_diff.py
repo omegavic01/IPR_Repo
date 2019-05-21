@@ -30,9 +30,9 @@ def main():
 
     # Join file names to path's.
     ipr_src_file = os.path.join(interim_data_path,
-                                'DDI_to_IPR.xlsx')
+                                'DDI_to_IPR 20190509.xlsx')
     ipr_src_mod_file = os.path.join(interim_data_path,
-                                    'DDI_to_IPR 0509 modd.xlsx')
+                                    'DDI_to_IPR 20190509- full modded-je-2.xlsx')
     output_file = os.path.join(processed_data_path,
                                'Potential Updates for DDI.xlsx')
 
