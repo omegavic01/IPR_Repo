@@ -189,7 +189,7 @@ def _filter_data(file):
             ddi_dict['Filt-Re-IP'].append(rddifirst_sheet.row_values(i))
             continue
         if 'drop reserve' in rddifirst_sheet.row_values(i)[20]:
-            ddi_dict['Filt-Re-IP'].append(rddifirst_sheet.row_values(i))
+            ddi_dict['Filt-Drop Reserve'].append(rddifirst_sheet.row_values(i))
             continue
         if '100.88.0.0/29' in rddifirst_sheet.row_values(i)[3]:
             ddi_dict['Filt-100.88-Cidr-29'].\

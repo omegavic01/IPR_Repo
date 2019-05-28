@@ -9,7 +9,7 @@ Notes to the reader:
 
 -   These scripts have been built and run on Python 3.6.6. Recommend
     Python 3.6.6 on up if you are wanting to try these scripts.
--   PyCharm Community Edition 2017.2.4 is the IDE used in the running of these
+-   PyCharm Community Edition 2017.2.4 is the I D E used in the running of these
     scripts within this project. These scripts have not been tested from the
     command line.
 -   Refer to .env\_template file to update your .env file for your local
