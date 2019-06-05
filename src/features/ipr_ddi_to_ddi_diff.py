@@ -32,14 +32,14 @@ def main():
     ipr_src_file = os.path.join(interim_data_path,
                                 'DDI_to_IPR 20190509.xlsx')
     ipr_src_mod_file = os.path.join(interim_data_path,
-                                    'DDI_to_IPR 20190509- full modded-je-2.xlsx')
+                                    'MASTER - Report by percent 20190509vKP.xlsx')
     output_file = os.path.join(processed_data_path,
-                               'Potential Updates for DDI.xlsx')
+                               'Potential Updates for DDI vKP.xlsx')
 
     logger.info('Loading Data')
     # Original Dataset Check Sheet index
     ipr = open_workbook(ipr_src_file)
-    ipr_sheet = ipr.sheet_by_index(1)
+    ipr_sheet = ipr.sheet_by_index(0)
     # Modified Dataset Check Sheet index
     ipr_mod = open_workbook(ipr_src_mod_file)
     ipr_mod_sheet = ipr_mod.sheet_by_index(1)

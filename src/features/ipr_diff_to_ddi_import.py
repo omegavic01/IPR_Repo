@@ -900,10 +900,10 @@ def main():
     reports_data_path = os.path.join(PROJECT_DIR, 'reports')
 
     # Build File and File path.
-    # src_file = os.path.join(processed_data_path,
-    #                         'Potential Updates for DDI.xlsx')
     src_file = os.path.join(processed_data_path,
-                            'Div street Addresses 2019-04-17.xlsx')
+                            'Potential Updates for DDI vKP.xlsx')
+    # src_file = os.path.join(processed_data_path,
+    #                         'Div street Addresses 2019-04-17.xlsx')
     ea_data_file = os.path.join(raw_data_path, 'ea_data.pkl')
     ddi_data_file = os.path.join(raw_data_path, 'ddi_data.pkl')
     add_file = os.path.join(reports_data_path, 'Add Import.csv')
@@ -922,7 +922,7 @@ def main():
 
     logger.info('Loading Data from source file')
     src_wb = open_workbook(src_file)
-    src_ws = src_wb.sheet_by_index(1)
+    src_ws = src_wb.sheet_by_index(0)
 
     logger.info('Compiling source file list of views.')
     views = _get_views(src_ws)
