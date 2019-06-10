@@ -378,6 +378,45 @@ def _write_output_for_merge_drop_reserve_csv(data, file):
                                      'OVERRIDE'])
 
 
+def _write_output_for_merge_csv_iprd(data, file, value=None):
+    """
+    This function writes out a .csv file for an import type: merge.
+    """
+    if value:
+        with open(file, 'w', encoding='utf-8', newline='') as csvfile:
+            file_write = csv.writer(csvfile, delimiter='\t')
+            for stuff in data:
+                if 'network' in stuff:
+                    file_write.writerow(['header-network',
+                                         'address*',
+                                         'netmask*',
+                                         'network_view',
+                                         'EA-IPR Designation',
+                                         'EAInherited-IPR Designation'])
+                    file_write.writerow([stuff[2],
+                                         stuff[1].split('/')[0],
+                                         cidr_to_netmask(stuff[1].
+                                                         split('/')[1]),
+                                         stuff[0],
+                                         value,
+                                         'OVERRIDE'])
+                if 'networkcontainer' in stuff:
+                    file_write.writerow(['header-networkcontainer',
+                                         'address*',
+                                         'netmask*',
+                                         'network_view',
+                                         'EA-IPR Designation',
+                                         'EAInherited-IPR Designation'])
+                    file_write.writerow([stuff[2],
+                                         stuff[1].split('/')[0],
+                                         stuff[1].split('/')[1],
+                                         stuff[0],
+                                         value,
+                                         'OVERRIDE'])
+    else:
+        raise ValueError('value needs to be defined: %s'.format(value))
+
+
 def _write_output_for_delete_csv(data, file):
     """
     This function writes out a .csv file for an import type: delete.
@@ -588,6 +627,8 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
     import_merge_ignore = []
     import_merge_re_ip = []
     import_merge_drop_reserve = []
+    import_merge_adv = []
+    import_merge_decom = []
     import_merge = []
     import_delete = []
     import_override = []
@@ -621,6 +662,16 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
         if 'dup' == src_row[0].lower() and 'IPR Designation' not in \
                 ddi['extattrs']:
             import_merge_dup.append([src_row[15], src_row[1], src_row[14]])
+            continue
+        # decom Check in dispostion
+        if 'decom' == src_row[0].lower() and 'IPR Designation' not in \
+                ddi['extattrs']:
+            import_merge_decom.append([src_row[15], src_row[1], src_row[14]])
+            continue
+        # adv Check in dispostion
+        if 'adv' == src_row[0].lower() and 'IPR Designation' not in \
+                ddi['extattrs']:
+            import_merge_adv.append([src_row[15], src_row[1], src_row[14]])
             continue
         # leaf Check in disposition
         if 'leaf' == src_row[0].lower() and 'IPR Designation' not in \
@@ -697,7 +748,7 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
     return import_add, import_merge, import_delete, import_override, \
            import_override_to_blank, import_merge_dup, import_merge_leaf, \
            import_merge_ignore, import_merge_re_ip, import_merge_drop_reserve,\
-           import_merge_divest
+           import_merge_divest, import_merge_adv, import_merge_decom
 
 
 def main_phase_one(views, src_ws, ddi_path):
@@ -901,7 +952,7 @@ def main():
 
     # Build File and File path.
     src_file = os.path.join(processed_data_path,
-                            'Potential Updates for DDI vKP.xlsx')
+                            'IP NA .xlsx')
     # src_file = os.path.join(processed_data_path,
     #                         'Div street Addresses 2019-04-17.xlsx')
     ea_data_file = os.path.join(raw_data_path, 'ea_data.pkl')
@@ -909,6 +960,8 @@ def main():
     add_file = os.path.join(reports_data_path, 'Add Import.csv')
     merge_file = os.path.join(reports_data_path, 'Merge Import.csv')
     dup_file = os.path.join(reports_data_path, 'Merge Dup Import.csv')
+    adv_file = os.path.join(reports_data_path, 'Merge Adv Import.csv')
+    decom_file = os.path.join(reports_data_path, 'Merge Decom Import.csv')
     leaf_file = os.path.join(reports_data_path, 'Merge Leaf Import.csv')
     divest_file = os.path.join(reports_data_path, 'Merge Divest Import.csv')
     ignore_file = os.path.join(reports_data_path, 'Merge Ignore Import.csv')
@@ -935,7 +988,7 @@ def main():
 
     # Building data sets for in preparation for writing.
     add, merge, delete, override, override_blanks, dup, leaf, ignore, re_ip,\
-    drop_reserve, divest = main_phase_one(views, src_ws, ddi_data_file)
+    drop_reserve, divest, adv, decom = main_phase_one(views, src_ws, ddi_data_file)
 
     # Send data off to be written.
     logger.info('Writing Data.  Please refer to the reports dir.')
@@ -951,6 +1004,10 @@ def main():
         _write_output_for_override_blanks_csv(override_blanks,
                                               override_to_blank_file)
     # IPR Designation Transition
+    if adv:
+        _write_output_for_merge_csv_iprd(adv, adv_file, value='adv')
+    if decom:
+        _write_output_for_merge_csv_iprd(decom, decom_file, value='decom')
     if dup:
         _write_output_for_merge_dup_csv(dup, dup_file)
     if leaf:

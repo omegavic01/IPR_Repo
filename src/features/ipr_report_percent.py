@@ -46,7 +46,7 @@ def main():
     # Join file names to path's.
     source_file = os.path.join(reports_data_path, 'DDI_to_IPR.xlsx')
     mtr_prcnt_tmplt = os.path.join(interim_data_path,
-                                   'MASTER - Report by percent temp-v01.xlsx')
+                                   'MASTER - Report by percent-BLANK.xlsx')
     mtr_prcnt_file = os.path.join(reports_data_path,
                                   'MASTER - Report by percent.xlsx')
 
