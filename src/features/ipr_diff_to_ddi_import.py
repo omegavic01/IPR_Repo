@@ -162,6 +162,42 @@ def _write_output_for_merge_csv(data, file):
                                              'OVERRIDE'])
 
 
+def _write_output_for_merge_disposition_csv(data, file):
+    """
+    This function writes out a .csv file for an import type: merge.
+    """
+    with open(file, 'w', encoding='utf-8', newline='') as csvfile:
+        file_write = csv.writer(csvfile, delimiter='\t')
+        for stuff in data:
+            if 'network' in stuff:
+                file_write.writerow(['header-network',
+                                     'address*',
+                                     'netmask*',
+                                     'network_view',
+                                     'EA-IPR Designation',
+                                     'EAInherited-IPR Designation'])
+                file_write.writerow([stuff[2],
+                                     stuff[1].split('/')[0],
+                                     cidr_to_netmask(stuff[1].
+                                                     split('/')[1]),
+                                     stuff[0],
+                                     'dup',
+                                     'OVERRIDE'])
+            if 'networkcontainer' in stuff:
+                file_write.writerow(['header-networkcontainer',
+                                     'address*',
+                                     'netmask*',
+                                     'network_view',
+                                     'EA-IPR Designation',
+                                     'EAInherited-IPR Designation'])
+                file_write.writerow([stuff[2],
+                                     stuff[1].split('/')[0],
+                                     stuff[1].split('/')[1],
+                                     stuff[0],
+                                     'dup',
+                                     'OVERRIDE'])
+
+
 def _write_output_for_merge_dup_csv(data, file):
     """
     This function writes out a .csv file for an import type: merge.
@@ -621,24 +657,13 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
         -- import_override_to_blank - data set to go through an override import
     """
     import_add = []
-    import_merge_leaf = []
-    import_merge_divest = []
-    import_merge_dup = []
-    import_merge_ignore = []
-    import_merge_re_ip = []
-    import_merge_drop_reserve = []
-    import_merge_adv = []
-    import_merge_decom = []
-    import_merge = []
     import_delete = []
-    import_override = []
-    import_override_to_blank = []
-    for idx in range(src_n_rows):
-        if idx == 0:
+    for add_or_del_row in range(src_n_rows):
+        if add_or_del_row == 0:
             continue
-        src_row = src_ws.row_values(idx)
+        src_row = src_ws.row_values(add_or_del_row)
         # Add Check.
-        if 'add' in src_row[0].lower():
+        if 'add' in src_row[0].lower().strip():
             if src_row[1].strip() in ddi_data[views_index[src_row[15]]]:
                 pass
             else:
@@ -649,106 +674,87 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
             ddi = ddi_data[views_index[src_row[15]]][src_row[1].strip()]
         else:
             continue
-        # ddi = ddi_data[views_index[src_row[15]]][src_row[1].strip()]
 
-        temp_dict_merge = {}
-        temp_dict_override = {}
-        temp_dict_override_to_blank = {}
         # delete check
-        if 'del' in src_row[0].lower() and src_row[1] in ddi['network']:
+        if 'del' in src_row[0].lower().strip() and \
+                src_row[1] in ddi['network']:
             import_delete.append([src_row[15], src_row[1], src_row[14]])
             continue
+
+    # For data storage when parsing through disposition column.
+    import_merge_disposition = []
+    # Check for extensible attribute IPR Disposition column.
+    ea_ipr_d_values = ['leaf', 'dup', 'followup', 'decom', 'adv', 'divest',
+                       'ignore', 're-ip', 'parent', 'drop reserve']
+    for disposition_row in range(src_n_rows):
+        if disposition_row == 0:
+            continue
+        src_row = src_ws.row_values(disposition_row)
+        # Skip over uneeded columns.
+        if 'add' in src_row[0].lower().strip() or \
+                'del' in src_row[0].lower().strip():
+            continue
         # dup Check in disposition
-        if 'dup' == src_row[0].lower() and 'IPR Designation' not in \
-                ddi['extattrs']:
-            import_merge_dup.append([src_row[15], src_row[1], src_row[14]])
+        ddi_index = views_index[src_row[15]]
+        if src_row[0].lower().strip() in ea_ipr_d_values and \
+                'IPR Designation' not in \
+                ddi_data[ddi_index][src_row[1]]['extattrs']:
+            import_merge_disposition.append(
+                [src_row[15], src_row[1], src_row[14], src_row[0].lower()])
+
+    temp_dict_merge = {}
+    temp_dict_override = {}
+    temp_dict_override_to_blank = {}
+    # Comment check.
+    if 'comment' not in ddi.keys() and src_row[12].strip() == '':
+        pass
+    elif 'comment' not in ddi.keys() and src_row[12].strip() != '':
+        temp_dict_merge.update({'comment': src_row[12].strip()})
+    elif src_row[12].strip() != ddi['comment'] and \
+            src_row[12].strip() == '':
+        temp_dict_override_to_blank.update(
+            {'comment': src_row[12].strip()})
+    elif src_row[12].strip() != ddi['comment'] and \
+            src_row[12].strip() != '':
+        temp_dict_override.update({'comment': src_row[12].strip()})
+    # EA check
+    for key, value in ea_index.items():
+        if '\n' in src_row[value]:
+            src_row[value] = src_row[value].replace('\n', ', ')
+        if ', ,' in src_row[value]:
+            src_row[value] = src_row[value].replace(', ,', ', ')
+        if key not in ddi['extattrs'].keys() and \
+                src_row[value].strip() in ['', 'DDI']:
             continue
-        # decom Check in dispostion
-        if 'decom' == src_row[0].lower() and 'IPR Designation' not in \
-                ddi['extattrs']:
-            import_merge_decom.append([src_row[15], src_row[1], src_row[14]])
-            continue
-        # adv Check in dispostion
-        if 'adv' == src_row[0].lower() and 'IPR Designation' not in \
-                ddi['extattrs']:
-            import_merge_adv.append([src_row[15], src_row[1], src_row[14]])
-            continue
-        # leaf Check in disposition
-        if 'leaf' == src_row[0].lower() and 'IPR Designation' not in \
-                ddi['extattrs']:
-            import_merge_leaf.append([src_row[15], src_row[1], src_row[14]])
-            continue
-        # leaf Check in disposition
-        if 'divest' == src_row[0].lower() and 'IPR Designation' not in \
-                ddi['extattrs']:
-            import_merge_divest.append([src_row[15], src_row[1], src_row[14]])
-            continue
-        # ignore Check in disposition
-        if 'ignore' == src_row[0].lower() and 'IPR Designation' not in \
-                ddi['extattrs']:
-            import_merge_ignore.append([src_row[15], src_row[1], src_row[14]])
-            continue
-        # RE-ip Check in disposition
-        if 're-ip' == src_row[0].lower() and 'IPR Designation' not in \
-                ddi['extattrs']:
-            import_merge_re_ip.append([src_row[15], src_row[1], src_row[14]])
-            continue
-        # drop reserve Check in disposition
-        if 'drop reserve' == src_row[0].lower() and 'IPR Designation' not in \
-                ddi['extattrs']:
-            import_merge_drop_reserve.append([src_row[15],
-                                              src_row[1],
-                                              src_row[14]])
-            continue
-        # Comment check.
-        if 'comment' not in ddi.keys() and src_row[12].strip() == '':
-            pass
-        elif 'comment' not in ddi.keys() and src_row[12].strip() != '':
-            temp_dict_merge.update({'comment': src_row[12].strip()})
-        elif src_row[12].strip() != ddi['comment'] and \
-                src_row[12].strip() == '':
-            temp_dict_override_to_blank.update(
-                {'comment': src_row[12].strip()})
-        elif src_row[12].strip() != ddi['comment'] and \
-                src_row[12].strip() != '':
-            temp_dict_override.update({'comment': src_row[12].strip()})
-        # EA check
-        for key, value in ea_index.items():
-            if '\n' in src_row[value]:
-                src_row[value] = src_row[value].replace('\n', ', ')
-            if ', ,' in src_row[value]:
-                src_row[value] = src_row[value].replace(', ,', ', ')
-            if key not in ddi['extattrs'].keys() and \
-                    src_row[value].strip() in ['', 'DDI']:
-                continue
-            elif key not in ddi['extattrs'].keys() and \
-                    src_row[value].strip() not in ['', 'DDI']:
-                temp_dict_merge.update({key: src_row[value]})
-            elif src_row[value].strip() != ddi['extattrs'][key]['value'] and \
-                    src_row[value].strip() not in ['', 'DDI']:
-                temp_dict_override.update({key: src_row[value]})
-            elif src_row[value].strip() != ddi['extattrs'][key]['value'] and \
-                    src_row[value].strip() not in ['', 'DDI']:
-                temp_dict_override_to_blank.update({key: src_row[value]})
-        if temp_dict_merge:
-            import_merge.append([src_row[15].strip(),
-                                 src_row[1].strip(),
-                                 src_row[14].strip(),
-                                 temp_dict_merge])
-        if temp_dict_override:
-            import_override.append([src_row[15].strip(),
-                                    src_row[1].strip(),
-                                    src_row[14].strip(),
-                                    temp_dict_override])
-        if temp_dict_override_to_blank:
-            import_override_to_blank.append([src_row[15].strip(),
-                                             src_row[1].strip(),
-                                             src_row[14].strip(),
-                                             temp_dict_override_to_blank])
-    return import_add, import_merge, import_delete, import_override, \
-           import_override_to_blank, import_merge_dup, import_merge_leaf, \
-           import_merge_ignore, import_merge_re_ip, import_merge_drop_reserve,\
-           import_merge_divest, import_merge_adv, import_merge_decom
+        elif key not in ddi['extattrs'].keys() and \
+                src_row[value].strip() not in ['', 'DDI']:
+            temp_dict_merge.update({key: src_row[value]})
+        elif src_row[value].strip() != ddi['extattrs'][key]['value'] and \
+                src_row[value].strip() not in ['', 'DDI']:
+            temp_dict_override.update({key: src_row[value]})
+        elif src_row[value].strip() != ddi['extattrs'][key]['value'] and \
+                src_row[value].strip() not in ['', 'DDI']:
+            temp_dict_override_to_blank.update({key: src_row[value]})
+    if temp_dict_merge:
+        import_merge.append([src_row[15].strip(),
+                             src_row[1].strip(),
+                             src_row[14].strip(),
+                             temp_dict_merge])
+    if temp_dict_override:
+        import_override.append([src_row[15].strip(),
+                                src_row[1].strip(),
+                                src_row[14].strip(),
+                                temp_dict_override])
+    if temp_dict_override_to_blank:
+        import_override_to_blank.append([src_row[15].strip(),
+                                         src_row[1].strip(),
+                                         src_row[14].strip(),
+                                         temp_dict_override_to_blank])
+#    return import_add, import_merge, import_delete, import_override, \
+#           import_override_to_blank, import_merge_dup, import_merge_leaf, \
+#           import_merge_ignore, import_merge_re_ip, import_merge_drop_reserve,\
+#           import_merge_divest, import_merge_adv, import_merge_decom
+    return import_add, import_delete, import_merge_disposition
 
 
 def main_phase_one(views, src_ws, ddi_path):
@@ -952,13 +958,15 @@ def main():
 
     # Build File and File path.
     src_file = os.path.join(processed_data_path,
-                            'IP NA .xlsx')
+                            'Book1 vJE.xlsx')
     # src_file = os.path.join(processed_data_path,
     #                         'Div street Addresses 2019-04-17.xlsx')
     ea_data_file = os.path.join(raw_data_path, 'ea_data.pkl')
     ddi_data_file = os.path.join(raw_data_path, 'ddi_data.pkl')
     add_file = os.path.join(reports_data_path, 'Add Import.csv')
     merge_file = os.path.join(reports_data_path, 'Merge Import.csv')
+    disposition_file = os.path.join(reports_data_path,
+                                    'Merge Disposition Import.csv')
     dup_file = os.path.join(reports_data_path, 'Merge Dup Import.csv')
     adv_file = os.path.join(reports_data_path, 'Merge Adv Import.csv')
     decom_file = os.path.join(reports_data_path, 'Merge Decom Import.csv')
@@ -987,40 +995,43 @@ def main():
         get_ddi_ip_data(views, ea_data_file, ddi_data_file, logger)
 
     # Building data sets for in preparation for writing.
-    add, merge, delete, override, override_blanks, dup, leaf, ignore, re_ip,\
-    drop_reserve, divest, adv, decom = main_phase_one(views, src_ws, ddi_data_file)
+#    add, merge, delete, override, override_blanks, dup, leaf, ignore, re_ip,\
+#    drop_reserve, divest, adv, decom = main_phase_one(views, src_ws, ddi_data_file)
+    add, delete, disposition = main_phase_one(views, src_ws, ddi_data_file)
 
     # Send data off to be written.
     logger.info('Writing Data.  Please refer to the reports dir.')
     if add:
         _write_output_for_add_csv(add, add_file)
-    if merge:
-        _write_output_for_merge_csv(merge, merge_file)
+#    if merge:
+#        _write_output_for_merge_csv(merge, merge_file)
     if delete:
         _write_output_for_delete_csv(delete, delete_file)
-    if override:
-        _write_output_for_override_csv(override, override_file)
-    if override_blanks:
-        _write_output_for_override_blanks_csv(override_blanks,
-                                              override_to_blank_file)
+#    if override:
+#        _write_output_for_override_csv(override, override_file)
+#    if override_blanks:
+#        _write_output_for_override_blanks_csv(override_blanks,
+#                                              override_to_blank_file)
     # IPR Designation Transition
-    if adv:
-        _write_output_for_merge_csv_iprd(adv, adv_file, value='adv')
-    if decom:
-        _write_output_for_merge_csv_iprd(decom, decom_file, value='decom')
-    if dup:
-        _write_output_for_merge_dup_csv(dup, dup_file)
-    if leaf:
-        _write_output_for_merge_leaf_csv(leaf, leaf_file)
-    if ignore:
-        _write_output_for_merge_ignore_csv(ignore, ignore_file)
-    if re_ip:
-        _write_output_for_merge_re_ip_csv(re_ip, re_ip_file)
-    if drop_reserve:
-        _write_output_for_merge_drop_reserve_csv(drop_reserve,
-                                                 drop_reserve_file)
-    if divest:
-        _write_output_for_merge_divest_csv(divest, divest_file)
+#    if adv:
+#        _write_output_for_merge_csv_iprd(adv, adv_file, value='adv')
+#    if decom:
+#        _write_output_for_merge_csv_iprd(decom, decom_file, value='decom')
+#    if dup:
+#        _write_output_for_merge_dup_csv(dup, dup_file)
+#    if leaf:
+#        _write_output_for_merge_leaf_csv(leaf, leaf_file)
+#    if ignore:
+#        _write_output_for_merge_ignore_csv(ignore, ignore_file)
+#    if re_ip:
+#        _write_output_for_merge_re_ip_csv(re_ip, re_ip_file)
+#    if drop_reserve:
+#        _write_output_for_merge_drop_reserve_csv(drop_reserve,
+#                                                 drop_reserve_file)
+#    if divest:
+#        _write_output_for_merge_divest_csv(divest, divest_file)
+    if disposition:
+        _write_output_for_merge_disposition_csv(disposition, disposition_file)
 
 
 if __name__ == '__main__':
