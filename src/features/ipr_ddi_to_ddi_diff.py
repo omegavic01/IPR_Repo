@@ -30,19 +30,19 @@ def main():
 
     # Join file names to path's.
     ipr_src_file = os.path.join(interim_data_path,
-                                'DDI_to_IPR 20190607.xlsx')
+                                'IPAM-to-IPR-20190701.xlsx')
     ipr_src_mod_file = os.path.join(interim_data_path,
-                                    'IPAM-to-IPR-2019-06-27.xlsx')
+                                    'IPAM-to-IPR-20190701_hv.xlsx')
     output_file = os.path.join(processed_data_path,
-                               'Diff between 0607 and 0627 Master.xlsx')
+                               'Diff between Full.xlsx')
 
     logger.info('Loading Data')
     # Original Dataset Check Sheet index
     ipr = open_workbook(ipr_src_file)
-    ipr_sheet = ipr.sheet_by_index(0)
+    ipr_sheet = ipr.sheet_by_index(1)
     # Modified Dataset Check Sheet index
     ipr_mod = open_workbook(ipr_src_mod_file)
-    ipr_mod_sheet = ipr_mod.sheet_by_index(0)
+    ipr_mod_sheet = ipr_mod.sheet_by_index(1)
 
     # Add Datasets to a python list.
     updatelist = []

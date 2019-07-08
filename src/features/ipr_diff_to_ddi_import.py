@@ -56,10 +56,19 @@ def _write_output_for_add_csv(data, file):
                         temp_header.append('comment')
                 # Check for EA's
                 for key in ea_index.keys():
+                    if key in ['Datacenter', 'IPR Designation'] and \
+                            ',' in stuff[ea_index[key]]:
+                        items = stuff[ea_index[key]].split(',')
+                        for item in items:
+                            temp_header.append('EA-'+key)
+                            temp_header.append('EAInherited-'+key)
+                            temp_data.append(item.strip())
+                            temp_data.append('OVERRIDE')
+                        continue
                     if stuff[ea_index[key]]:
                         temp_header.append('EA-'+key)
                         temp_header.append('EAInherited-'+key)
-                        temp_data.append(stuff[ea_index[key]])
+                        temp_data.append(stuff[ea_index[key]].strip())
                         temp_data.append('OVERRIDE')
                 # Write Header Row on new line.
                 file_write.writerow(temp_header)
@@ -88,6 +97,15 @@ def _write_output_for_add_csv(data, file):
                         temp_header.append('comment')
                 # Check for EA's
                 for key in ea_index.keys():
+                    if key in ['Datacenter', 'IPR Designation'] and \
+                                    ',' in stuff[ea_index[key]]:
+                        items = stuff[ea_index[key]].split(',')
+                        for item in items:
+                            temp_header.append('EA-'+key)
+                            temp_header.append('EAInherited-'+key)
+                            temp_data.append(item.strip())
+                            temp_data.append('OVERRIDE')
+                        continue
                     if stuff[ea_index[key]]:
                         temp_header.append('EA-'+key)
                         temp_header.append('EAInherited-'+key)
@@ -181,7 +199,7 @@ def _write_output_for_merge_disposition_csv(data, file):
                                      cidr_to_netmask(stuff[1].
                                                      split('/')[1]),
                                      stuff[0],
-                                     'dup',
+                                     stuff[3],
                                      'OVERRIDE'])
             if 'networkcontainer' in stuff:
                 file_write.writerow(['header-networkcontainer',
@@ -194,263 +212,8 @@ def _write_output_for_merge_disposition_csv(data, file):
                                      stuff[1].split('/')[0],
                                      stuff[1].split('/')[1],
                                      stuff[0],
-                                     'dup',
+                                     stuff[3],
                                      'OVERRIDE'])
-
-
-def _write_output_for_merge_dup_csv(data, file):
-    """
-    This function writes out a .csv file for an import type: merge.
-    """
-    with open(file, 'w', encoding='utf-8', newline='') as csvfile:
-        file_write = csv.writer(csvfile, delimiter='\t')
-        for stuff in data:
-            if 'network' in stuff:
-                file_write.writerow(['header-network',
-                                     'address*',
-                                     'netmask*',
-                                     'network_view',
-                                     'EA-IPR Designation',
-                                     'EAInherited-IPR Designation'])
-                file_write.writerow([stuff[2],
-                                     stuff[1].split('/')[0],
-                                     cidr_to_netmask(stuff[1].
-                                                     split('/')[1]),
-                                     stuff[0],
-                                     'dup',
-                                     'OVERRIDE'])
-            if 'networkcontainer' in stuff:
-                file_write.writerow(['header-networkcontainer',
-                                     'address*',
-                                     'netmask*',
-                                     'network_view',
-                                     'EA-IPR Designation',
-                                     'EAInherited-IPR Designation'])
-                file_write.writerow([stuff[2],
-                                     stuff[1].split('/')[0],
-                                     stuff[1].split('/')[1],
-                                     stuff[0],
-                                     'dup',
-                                     'OVERRIDE'])
-
-
-def _write_output_for_merge_leaf_csv(data, file):
-    """
-    This function writes out a .csv file for an import type: merge.
-    """
-    with open(file, 'w', encoding='utf-8', newline='') as csvfile:
-        file_write = csv.writer(csvfile, delimiter='\t')
-        for stuff in data:
-            if 'network' in stuff:
-                file_write.writerow(['header-network',
-                                     'address*',
-                                     'netmask*',
-                                     'network_view',
-                                     'EA-IPR Designation',
-                                     'EAInherited-IPR Designation'])
-                file_write.writerow([stuff[2],
-                                     stuff[1].split('/')[0],
-                                     cidr_to_netmask(stuff[1].
-                                                     split('/')[1]),
-                                     stuff[0],
-                                     'leaf',
-                                     'OVERRIDE'])
-            if 'networkcontainer' in stuff:
-                file_write.writerow(['header-networkcontainer',
-                                     'address*',
-                                     'netmask*',
-                                     'network_view',
-                                     'EA-IPR Designation',
-                                     'EAInherited-IPR Designation'])
-                file_write.writerow([stuff[2],
-                                     stuff[1].split('/')[0],
-                                     stuff[1].split('/')[1],
-                                     stuff[0],
-                                     'leaf',
-                                     'OVERRIDE'])
-
-
-def _write_output_for_merge_divest_csv(data, file):
-    """
-    This function writes out a .csv file for an import type: merge.
-    """
-    with open(file, 'w', encoding='utf-8', newline='') as csvfile:
-        file_write = csv.writer(csvfile, delimiter='\t')
-        for stuff in data:
-            if 'network' in stuff:
-                file_write.writerow(['header-network',
-                                     'address*',
-                                     'netmask*',
-                                     'network_view',
-                                     'EA-IPR Designation',
-                                     'EAInherited-IPR Designation'])
-                file_write.writerow([stuff[2],
-                                     stuff[1].split('/')[0],
-                                     cidr_to_netmask(stuff[1].
-                                                     split('/')[1]),
-                                     stuff[0],
-                                     'divest',
-                                     'OVERRIDE'])
-            if 'networkcontainer' in stuff:
-                file_write.writerow(['header-networkcontainer',
-                                     'address*',
-                                     'netmask*',
-                                     'network_view',
-                                     'EA-IPR Designation',
-                                     'EAInherited-IPR Designation'])
-                file_write.writerow([stuff[2],
-                                     stuff[1].split('/')[0],
-                                     stuff[1].split('/')[1],
-                                     stuff[0],
-                                     'divest',
-                                     'OVERRIDE'])
-
-
-def _write_output_for_merge_ignore_csv(data, file):
-    """
-    This function writes out a .csv file for an import type: merge.
-    """
-    with open(file, 'w', encoding='utf-8', newline='') as csvfile:
-        file_write = csv.writer(csvfile, delimiter='\t')
-        for stuff in data:
-            if 'network' in stuff:
-                file_write.writerow(['header-network',
-                                     'address*',
-                                     'netmask*',
-                                     'network_view',
-                                     'EA-IPR Designation',
-                                     'EAInherited-IPR Designation'])
-                file_write.writerow([stuff[2],
-                                     stuff[1].split('/')[0],
-                                     cidr_to_netmask(stuff[1].
-                                                     split('/')[1]),
-                                     stuff[0],
-                                     'ignore',
-                                     'OVERRIDE'])
-            if 'networkcontainer' in stuff:
-                file_write.writerow(['header-networkcontainer',
-                                     'address*',
-                                     'netmask*',
-                                     'network_view',
-                                     'EA-IPR Designation',
-                                     'EAInherited-IPR Designation'])
-                file_write.writerow([stuff[2],
-                                     stuff[1].split('/')[0],
-                                     stuff[1].split('/')[1],
-                                     stuff[0],
-                                     'ignore',
-                                     'OVERRIDE'])
-
-
-def _write_output_for_merge_re_ip_csv(data, file):
-    """
-    This function writes out a .csv file for an import type: merge.
-    """
-    with open(file, 'w', encoding='utf-8', newline='') as csvfile:
-        file_write = csv.writer(csvfile, delimiter='\t')
-        for stuff in data:
-            if 'network' in stuff:
-                file_write.writerow(['header-network',
-                                     'address*',
-                                     'netmask*',
-                                     'network_view',
-                                     'EA-IPR Designation',
-                                     'EAInherited-IPR Designation'])
-                file_write.writerow([stuff[2],
-                                     stuff[1].split('/')[0],
-                                     cidr_to_netmask(stuff[1].
-                                                     split('/')[1]),
-                                     stuff[0],
-                                     're-ip',
-                                     'OVERRIDE'])
-            if 'networkcontainer' in stuff:
-                file_write.writerow(['header-networkcontainer',
-                                     'address*',
-                                     'netmask*',
-                                     'network_view',
-                                     'EA-IPR Designation',
-                                     'EAInherited-IPR Designation'])
-                file_write.writerow([stuff[2],
-                                     stuff[1].split('/')[0],
-                                     stuff[1].split('/')[1],
-                                     stuff[0],
-                                     're-ip',
-                                     'OVERRIDE'])
-
-
-def _write_output_for_merge_drop_reserve_csv(data, file):
-    """
-    This function writes out a .csv file for an import type: merge.
-    """
-    with open(file, 'w', encoding='utf-8', newline='') as csvfile:
-        file_write = csv.writer(csvfile, delimiter='\t')
-        for stuff in data:
-            if 'network' in stuff:
-                file_write.writerow(['header-network',
-                                     'address*',
-                                     'netmask*',
-                                     'network_view',
-                                     'EA-IPR Designation',
-                                     'EAInherited-IPR Designation'])
-                file_write.writerow([stuff[2],
-                                     stuff[1].split('/')[0],
-                                     cidr_to_netmask(stuff[1].
-                                                     split('/')[1]),
-                                     stuff[0],
-                                     'drop reserve',
-                                     'OVERRIDE'])
-            if 'networkcontainer' in stuff:
-                file_write.writerow(['header-networkcontainer',
-                                     'address*',
-                                     'netmask*',
-                                     'network_view',
-                                     'EA-IPR Designation',
-                                     'EAInherited-IPR Designation'])
-                file_write.writerow([stuff[2],
-                                     stuff[1].split('/')[0],
-                                     stuff[1].split('/')[1],
-                                     stuff[0],
-                                     'drop reserve',
-                                     'OVERRIDE'])
-
-
-def _write_output_for_merge_csv_iprd(data, file, value=None):
-    """
-    This function writes out a .csv file for an import type: merge.
-    """
-    if value:
-        with open(file, 'w', encoding='utf-8', newline='') as csvfile:
-            file_write = csv.writer(csvfile, delimiter='\t')
-            for stuff in data:
-                if 'network' in stuff:
-                    file_write.writerow(['header-network',
-                                         'address*',
-                                         'netmask*',
-                                         'network_view',
-                                         'EA-IPR Designation',
-                                         'EAInherited-IPR Designation'])
-                    file_write.writerow([stuff[2],
-                                         stuff[1].split('/')[0],
-                                         cidr_to_netmask(stuff[1].
-                                                         split('/')[1]),
-                                         stuff[0],
-                                         value,
-                                         'OVERRIDE'])
-                if 'networkcontainer' in stuff:
-                    file_write.writerow(['header-networkcontainer',
-                                         'address*',
-                                         'netmask*',
-                                         'network_view',
-                                         'EA-IPR Designation',
-                                         'EAInherited-IPR Designation'])
-                    file_write.writerow([stuff[2],
-                                         stuff[1].split('/')[0],
-                                         stuff[1].split('/')[1],
-                                         stuff[0],
-                                         value,
-                                         'OVERRIDE'])
-    else:
-        raise ValueError('value needs to be defined: %s'.format(value))
 
 
 def _write_output_for_delete_csv(data, file):
@@ -485,6 +248,7 @@ def _write_output_for_override_csv(data, file):
     """
     This function writes out a csv file for an import type: override.
     """
+    ea_index = _get_ea_index()
     with open(file, 'w', encoding='utf-8', newline='') as csvfile:
         file_write = csv.writer(csvfile, delimiter='\t')
         for stuff in data:
@@ -503,19 +267,41 @@ def _write_output_for_override_csv(data, file):
                                              stuff[0],
                                              stuff[3]['comment']])
                     if item != 'comment':
-                        file_write.writerow(['header-network',
-                                             'address*',
-                                             'netmask*',
-                                             'network_view',
-                                             'EA-' + item,
-                                             'EAInherited-' + item])
-                        file_write.writerow([stuff[2],
-                                             stuff[1].split('/')[0],
-                                             cidr_to_netmask(stuff[1].
-                                                             split('/')[1]),
-                                             stuff[0],
-                                             stuff[3][item],
-                                             'OVERRIDE'])
+                        if item in ['Datacenter', 'IPR Designation'] and \
+                                        ',' in stuff[3][item]:
+                            temp_data = [stuff[2],
+                                         stuff[1].split('/')[0],
+                                         cidr_to_netmask(stuff[1].
+                                                         split('/')[1]),
+                                         stuff[0]]
+                            temp_header = ['header-network',
+                                           'address*',
+                                           'netmask*',
+                                           'network_view']
+                            items = stuff[3][item].split(',')
+                            for it in items:
+                                temp_header.append('EA-' + item)
+                                temp_header.append('EAInherited-' + item)
+                                temp_data.append(it.strip())
+                                temp_data.append('OVERRIDE')
+                            # Write Header Row on new line.
+                            file_write.writerow(temp_header)
+                            # Write data Row on new line.
+                            file_write.writerow(temp_data)
+                        else:
+                            file_write.writerow(['header-network',
+                                                 'address*',
+                                                 'netmask*',
+                                                 'network_view',
+                                                 'EA-' + item,
+                                                 'EAInherited-' + item])
+                            file_write.writerow([stuff[2],
+                                                 stuff[1].split('/')[0],
+                                                 cidr_to_netmask(stuff[1].
+                                                                 split('/')[1]),
+                                                 stuff[0],
+                                                 stuff[3][item],
+                                                 'OVERRIDE'])
             if 'networkcontainer' in stuff:
                 for item in stuff[3].keys():
                     if item == 'comment':
@@ -530,18 +316,39 @@ def _write_output_for_override_csv(data, file):
                                              stuff[0],
                                              stuff[3]['comment']])
                     if item != 'comment':
-                        file_write.writerow(['header-networkcontainer',
-                                             'address*',
-                                             'netmask*',
-                                             'network_view',
-                                             'EA-' + item,
-                                             'EAInherited-' + item])
-                        file_write.writerow([stuff[2],
-                                             stuff[1].split('/')[0],
-                                             stuff[1].split('/')[1],
-                                             stuff[0],
-                                             stuff[3][item],
-                                             'OVERRIDE'])
+                        if item in ['Datacenter', 'IPR Designation'] and \
+                                        ',' in stuff[3][item]:
+                            temp_data = [stuff[2],
+                                         stuff[1].split('/')[0],
+                                         stuff[1].split('/')[1],
+                                         stuff[0]]
+                            temp_header = ['header-networkcontainer',
+                                           'address*',
+                                           'netmask*',
+                                           'network_view']
+                            items = stuff[3][item].split(',')
+                            for it in items:
+                                temp_header.append('EA-' + item)
+                                temp_header.append('EAInherited-' + item)
+                                temp_data.append(it.strip())
+                                temp_data.append('OVERRIDE')
+                            # Write Header Row on new line.
+                            file_write.writerow(temp_header)
+                            # Write data Row on new line.
+                            file_write.writerow(temp_data)
+                        else:
+                            file_write.writerow(['header-networkcontainer',
+                                                 'address*',
+                                                 'netmask*',
+                                                 'network_view',
+                                                 'EA-' + item,
+                                                 'EAInherited-' + item])
+                            file_write.writerow([stuff[2],
+                                                 stuff[1].split('/')[0],
+                                                 stuff[1].split('/')[1],
+                                                 stuff[0],
+                                                 stuff[3][item],
+                                                 'OVERRIDE'])
 
 
 def _write_output_for_override_blanks_csv(data, file):
@@ -643,7 +450,7 @@ def _get_rekey_ddi_data(ddi_data):
     return ddi_data
 
 
-def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
+def _get_diff_data(views_index, src_data, ea_index, ddi_data):
     """
     This function creates two separate dict's for overlap or merge imports
     based on how DDI handles imports.
@@ -656,135 +463,217 @@ def _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data):
         -- import_override - data set to go through an override import
         -- import_override_to_blank - data set to go through an override import
     """
+
+    def _add_and_del():
+        """Handles the add's and del import's."""
+        for add_or_del_row in src_data:
+            # Add Check.
+            if 'add' in add_or_del_row[0]:
+                if add_or_del_row[1] in \
+                        ddi_data[views_index[add_or_del_row[15]]]:
+                    errored_list.append(add_or_del_row)
+                    continue
+                else:
+                    import_add.append(add_or_del_row)
+                    continue
+
+            # delete check
+            if 'del' in add_or_del_row[0] and add_or_del_row[1] in \
+                    ddi_data[views_index[add_or_del_row[15]]][
+                        add_or_del_row[1]]:
+                import_delete.append([add_or_del_row[15],
+                                      add_or_del_row[1],
+                                      add_or_del_row[14]])
+                continue
+            unused_list.append(add_or_del_row)
+
+    def _ea_in_disposition_col0_and_empty_ipr_d_col():
+        """Disposition col0 check and an empty ipr disposition column."""
+        for disposition_row in unused_list:
+            # Check disposition
+            ddi_index = views_index[disposition_row[15]]
+            # Checks disposition column value and checks for IPR D value.
+            # If no IPR D in extattrs dict stores the src data for updates.
+            if disposition_row[0] in ea_ipr_d_values and 'IPR Designation' not\
+                    in ddi_data[ddi_index][disposition_row[1]]['extattrs']:
+                import_merge_disposition.append(
+                    [disposition_row[15],
+                     disposition_row[1],
+                     disposition_row[14],
+                     disposition_row[0]])
+
+    def _comment_check():
+        """Function for checking ipam comment attribute."""
+        for comment_row in unused_list:
+            ddi_index = views_index[comment_row[15]]
+            # Checks for empty src value and empty ddi data value.
+            # Continues if True.
+            if 'comment' not in ddi_data[ddi_index][comment_row[1]]\
+                    and comment_row[12] == '':
+                continue
+            # Checks a non-empty src value and updates if an
+            # empty ddi data value.
+            if 'comment' not in ddi_data[ddi_index][comment_row[1]] and \
+                    comment_row[12] != '':
+                import_merge.append([comment_row[15],
+                                     comment_row[1],
+                                     comment_row[14],
+                                     {'comment': comment_row[12]}])
+                continue
+            # Checks diff against src value and a populated value in the
+            # ddi data and replaces with src value.
+            if comment_row[12] != \
+                    ddi_data[ddi_index][comment_row[1]]['comment']:
+                import_override.append([comment_row[15],
+                                        comment_row[1],
+                                        comment_row[14],
+                                        {'comment': comment_row[12]}])
+                continue
+
+    def _non_listed_ea_columns_check():
+        """Checks non-listable ea columns."""
+        for ea_row in unused_list:
+            # dup Check in disposition
+            ddi_index = views_index[ea_row[15]]
+            for key, value in ea_index.items():
+                # ea attributes that could be listed.
+                if key == 'Datacenter' or key == 'IPR Designation':
+                    continue
+                # Checks for empty src value and empty ddi data value.
+                # Continues if True.
+                if key not in ddi_data[ddi_index][ea_row[1]]['extattrs'] and \
+                        ea_row[value] in ['', 'DDI']:
+                    continue
+                # Checks a non-empty src value and updates if an
+                # empty ddi data value.
+                if key not in ddi_data[ddi_index][ea_row[1]]['extattrs'] \
+                        and ea_row[value] not in ['', 'DDI']:
+                    import_merge.append([ea_row[15],
+                                         ea_row[1],
+                                         ea_row[14],
+                                         {key: ea_row[value]}])
+                    continue
+                # Checks diff against src value and a populated value in the
+                # ddi data and replaces with src value.
+                if ea_row[value] != \
+                        ddi_data[ddi_index][
+                            ea_row[1]]['extattrs'][key]['value']:
+                    import_override.append([ea_row[15],
+                                            ea_row[1],
+                                            ea_row[14],
+                                            {key: ea_row[value]}])
+                    continue
+
+    def _listed_ea_column_check():
+        """Checks non-listable ea columns."""
+        for ea_row in unused_list:
+            ddi_index = views_index[ea_row[15]]
+            # This check is performed in
+            # _ea_in_disposition_col0_and_empty_ipr_d_col
+            if ea_row[0] in ea_ipr_d_values and \
+                    'IPR Designation' not in \
+                    ddi_data[ddi_index][ea_row[1]]['extattrs']:
+                continue
+            # Update IPR D src column with ea_row[0] for processing.
+            # WORK IN PROGRESS
+            elif ea_row[0] in ea_ipr_d_values and 'IPR Designation' \
+                    in ddi_data[ddi_index][ea_row[1]]['extattrs']:
+                pass
+            # Processing listable columns.
+            for key, value in ea_index.items():
+                # Skip's unused keys.
+                if key not in ['Datacenter', 'IPR Designation']:
+                    continue
+                # Check for blank column and blank source column.
+                if key not in ddi_data[ddi_index][ea_row[1]]['extattrs'] and \
+                        ea_row[value] in ['', 'DDI']:
+                    continue
+                # Check for Disposition col, check for comma not in IPR D col
+                # value, check value in IPR D col to ea ipr d attribute list,
+                # check IPR D col value eq ddi value.
+                # On not listed IPR D values.
+                if key == 'IPR Designation':
+                    if ea_row[0] in ea_ipr_d_values \
+                        and ',' not in ea_row[16] \
+                            and ea_row[16] in ea_ipr_d_values:
+                        ea_row[16] = ea_row[16] + ',' + ea_row[0]
+                        import_override.append([ea_row[15].strip(),
+                                                ea_row[1].strip(),
+                                                ea_row[14].strip(),
+                                                {key: ea_row[16]}])
+                        continue
+                # Check for Disposition col, check for comma not in IPR D col
+                # value, check value in IPR D col to ea ipr d attribute list,
+                # check IPR D col value eq ddi value.
+                # On not listed IPR D values.
+                    elif ea_row[0] in ea_ipr_d_values \
+                            and ',' not in ea_row[16] \
+                            and ea_row[16] not in ea_ipr_d_values:
+                        import_override.append([ea_row[15].strip(),
+                                                ea_row[1].strip(),
+                                                ea_row[14].strip(),
+                                                {key: ea_row[0]}])
+                        continue
+#                # Check Disposition col. and if IPR D listed value needs
+#                # updating. On listed IPR D values.
+#                if ea_row[0].lower().strip() in ea_ipr_d_values \
+#                        and ',' in ea_row[16]:
+#                    temp_list = ea_row[16].split(',')
+#                    temp_list = [x.strip() for x in temp_list]
+#                    if ea_row[0].lower().strip() in temp_list:
+#                        continue
+#                    else:
+#                        temp_list.append(ea_row[0].lower().strip())
+#                        temp_dict_override.update({key: temp_list})
+#                        import_override.append([ea_row[15].strip(),
+#                                                ea_row[1].strip(),
+#                                                ea_row[14].strip(),
+#                                                temp_dict_override])
+#                        continue
+
+                # Builds dataset for non-listed values. Final Step.
+                # If key not in ddi data and src value is not none.
+                # Assign to merge.
+                if key not in ddi_data[ddi_index][ea_row[1]]['extattrs'] \
+                        and ea_row[value] not in ['', 'DDI']:
+                    import_merge.append([ea_row[15].strip(),
+                                         ea_row[1].strip(),
+                                         ea_row[14].strip(),
+                                         {key: ea_row[value]}])
+                    continue
+                # Checks diff against src value and a populated value in the
+                # ddi data and replaces with src value.
+                if ea_row[value] != \
+                        ddi_data[ddi_index][
+                            ea_row[1]]['extattrs'][key]['value']:
+                    import_override.append([ea_row[15],
+                                            ea_row[1],
+                                            ea_row[14],
+                                            {key: ea_row[value]}])
+                    continue
+
+    # Local scope variables.
     import_add = []
     import_delete = []
-    for add_or_del_row in range(src_n_rows):
-        if add_or_del_row == 0:
-            continue
-        src_row = src_ws.row_values(add_or_del_row)
-        # Add Check.
-        if 'add' in src_row[0].lower().strip():
-            if src_row[1].strip() in ddi_data[views_index[src_row[15]]]:
-                pass
-            else:
-                import_add.append(src_row)
-                continue
-        # Check to see if network is in ddi data.
-        if src_row[1].strip() in ddi_data[views_index[src_row[15]]]:
-            ddi = ddi_data[views_index[src_row[15]]][src_row[1].strip()]
-        else:
-            continue
-
-        # delete check
-        if 'del' in src_row[0].lower().strip() and \
-                src_row[1] in ddi['network']:
-            import_delete.append([src_row[15], src_row[1], src_row[14]])
-            continue
-
-    # For data storage when parsing through disposition column.
+    import_merge = []
+    import_override = []
     import_merge_disposition = []
-    # Check for extensible attribute IPR Disposition column.
+    unused_list = []
+    errored_list = []
+    # Check for extensible attribute in Disposition column[0].
+    # If found and IPR D column is empty append for writing.
     ea_ipr_d_values = ['leaf', 'dup', 'followup', 'decom', 'adv', 'divest',
                        'ignore', 're-ip', 'parent', 'drop reserve']
-    for disposition_row in range(src_n_rows):
-        if disposition_row == 0:
-            continue
-        src_row = src_ws.row_values(disposition_row)
-        # Skip over uneeded columns.
-        if 'add' in src_row[0].lower().strip() or \
-                'del' in src_row[0].lower().strip():
-            continue
-        # dup Check in disposition
-        ddi_index = views_index[src_row[15]]
-        if src_row[0].lower().strip() in ea_ipr_d_values and \
-                'IPR Designation' not in \
-                ddi_data[ddi_index][src_row[1]]['extattrs']:
-            import_merge_disposition.append(
-                [src_row[15], src_row[1], src_row[14], src_row[0].lower()])
-
-    temp_dict_merge = {}
-    temp_dict_override = {}
-    temp_dict_override_to_blank = {}
-    # Comment check.
-    if 'comment' not in ddi.keys() and src_row[12].strip() == '':
-        pass
-    elif 'comment' not in ddi.keys() and src_row[12].strip() != '':
-        temp_dict_merge.update({'comment': src_row[12].strip()})
-    elif src_row[12].strip() != ddi['comment'] and \
-            src_row[12].strip() == '':
-        temp_dict_override_to_blank.update(
-            {'comment': src_row[12].strip()})
-    elif src_row[12].strip() != ddi['comment'] and \
-            src_row[12].strip() != '':
-        temp_dict_override.update({'comment': src_row[12].strip()})
-    # EA check
-    for key, value in ea_index.items():
-        if '\n' in src_row[value]:
-            src_row[value] = src_row[value].replace('\n', ', ')
-        if ', ,' in src_row[value]:
-            src_row[value] = src_row[value].replace(', ,', ', ')
-        if key not in ddi['extattrs'].keys() and \
-                src_row[value].strip() in ['', 'DDI']:
-            continue
-        elif key not in ddi['extattrs'].keys() and \
-                src_row[value].strip() not in ['', 'DDI']:
-            temp_dict_merge.update({key: src_row[value]})
-        elif src_row[value].strip() != ddi['extattrs'][key]['value'] and \
-                src_row[value].strip() not in ['', 'DDI']:
-            temp_dict_override.update({key: src_row[value]})
-        elif src_row[value].strip() != ddi['extattrs'][key]['value'] and \
-                src_row[value].strip() not in ['', 'DDI']:
-            temp_dict_override_to_blank.update({key: src_row[value]})
-    if temp_dict_merge:
-        import_merge.append([src_row[15].strip(),
-                             src_row[1].strip(),
-                             src_row[14].strip(),
-                             temp_dict_merge])
-    if temp_dict_override:
-        import_override.append([src_row[15].strip(),
-                                src_row[1].strip(),
-                                src_row[14].strip(),
-                                temp_dict_override])
-    if temp_dict_override_to_blank:
-        import_override_to_blank.append([src_row[15].strip(),
-                                         src_row[1].strip(),
-                                         src_row[14].strip(),
-                                         temp_dict_override_to_blank])
-#    return import_add, import_merge, import_delete, import_override, \
-#           import_override_to_blank, import_merge_dup, import_merge_leaf, \
-#           import_merge_ignore, import_merge_re_ip, import_merge_drop_reserve,\
-#           import_merge_divest, import_merge_adv, import_merge_decom
-    return import_add, import_delete, import_merge_disposition
-
-
-def main_phase_one(views, src_ws, ddi_path):
-    """This function uses four other functions in order to index the data for
-    performing diff's.  While the last function call performs the action listed
-    below.
-
-    Functions:
-        -- _get_view_index
-        -- _get_rekey_ddi_data
-        -- _get_ea_index
-        -- _get_diff_data
-
-    Once the first three functions have completed.  The last function creates
-    two separate dict's for overlap or merge imports based on how DDI handles
-    imports.
-
-    Return Arguments:
-        -- import_merge - data set to go through a merge import process.
-        -- import_overwrite - data set to go through an overwrite import
-                                process.
-    """
-    with open(ddi_path, 'rb') as file_in:
-        ddi_data = pickle.load(file_in)
-    views_index = _get_view_index(views, ddi_data)
-    ddi_data = _get_rekey_ddi_data(ddi_data)
-    ea_index = _get_ea_index()
-    src_n_rows = src_ws.nrows
-
-    return _get_diff_data(views_index, src_ws, src_n_rows, ea_index, ddi_data)
+    _add_and_del()
+    _ea_in_disposition_col0_and_empty_ipr_d_col()
+    _comment_check()
+    _non_listed_ea_columns_check()
+    _listed_ea_column_check()
+    return import_add, \
+        import_delete, \
+        import_merge_disposition, \
+        import_merge, \
+        import_override
 
 
 def api_call_network_views(view, logger):
@@ -959,27 +848,14 @@ def main():
     # Build File and File path.
     src_file = os.path.join(processed_data_path,
                             'Book1 vJE.xlsx')
-    # src_file = os.path.join(processed_data_path,
-    #                         'Div street Addresses 2019-04-17.xlsx')
     ea_data_file = os.path.join(raw_data_path, 'ea_data.pkl')
     ddi_data_file = os.path.join(raw_data_path, 'ddi_data.pkl')
     add_file = os.path.join(reports_data_path, 'Add Import.csv')
     merge_file = os.path.join(reports_data_path, 'Merge Import.csv')
     disposition_file = os.path.join(reports_data_path,
                                     'Merge Disposition Import.csv')
-    dup_file = os.path.join(reports_data_path, 'Merge Dup Import.csv')
-    adv_file = os.path.join(reports_data_path, 'Merge Adv Import.csv')
-    decom_file = os.path.join(reports_data_path, 'Merge Decom Import.csv')
-    leaf_file = os.path.join(reports_data_path, 'Merge Leaf Import.csv')
-    divest_file = os.path.join(reports_data_path, 'Merge Divest Import.csv')
-    ignore_file = os.path.join(reports_data_path, 'Merge Ignore Import.csv')
-    re_ip_file = os.path.join(reports_data_path, 'Merge Re-IP Import.csv')
-    drop_reserve_file = os.path.join(reports_data_path,
-                                     'Merge drop_reserve Import.csv')
     delete_file = os.path.join(reports_data_path, 'Delete Import.csv')
     override_file = os.path.join(reports_data_path, 'Override Import.csv')
-    override_to_blank_file = os.path.join(reports_data_path,
-                                          'Override to Blank Cells Import.csv')
 
     logger.info('Loading Data from source file')
     src_wb = open_workbook(src_file)
@@ -994,42 +870,66 @@ def main():
         logger.info('ddi_api_call has been set to True.  Querying DDI.')
         get_ddi_ip_data(views, ea_data_file, ddi_data_file, logger)
 
+    def clean_data(data):
+        """Build listed dataset from worksheet."""
+        src_list = []
+        no_net_view = []
+        for row in range(data.nrows):
+            # Ignore header row.
+            if row == 0:
+                continue
+            # Ignore blank row.
+            if data.row_values(row)[1] == '' and \
+                    data.row_values(row)[15] == '':
+                continue
+            # Capture lines that do not have a view listed.
+            if data.row_values(row)[1] and not data.row_values(row)[15]:
+                no_net_view.append(data.row_values(row))
+                continue
+            src_list.append(data.row_values(row))
+
+        # Clean's src_list values.
+        src_list = [[item.replace('\t', '') for item in row
+                     if isinstance(item, str)]
+                    for row in src_list]
+        src_list = [[item.replace('\n', ', ') for item in row
+                     if isinstance(item, str)]
+                    for row in src_list]
+        src_list = [[item.replace(', ,', ', ') for item in row
+                     if isinstance(item, str)]
+                    for row in src_list]
+        src_list = [[item.strip() for item in row
+                     if isinstance(item, str)]
+                    for row in src_list]
+        for enum, row in enumerate(src_list):
+            row[0] = row[0].lower()
+            src_list[enum] = row
+        return src_list
+
+    src_data = clean_data(src_ws)
+
+    # Open DDI data compiled from ddi_api_call.
+    with open(ddi_data_file, 'rb') as file_in:
+        ddi_data = pickle.load(file_in)
+    # Build data extensions for later processing.
+    views_index = _get_view_index(views, ddi_data)
+    ddi_data = _get_rekey_ddi_data(ddi_data)
+    ea_index = _get_ea_index()
+
     # Building data sets for in preparation for writing.
-#    add, merge, delete, override, override_blanks, dup, leaf, ignore, re_ip,\
-#    drop_reserve, divest, adv, decom = main_phase_one(views, src_ws, ddi_data_file)
-    add, delete, disposition = main_phase_one(views, src_ws, ddi_data_file)
+    add, delete, disposition, merge, override = \
+        _get_diff_data(views_index, src_data, ea_index, ddi_data)
 
     # Send data off to be written.
     logger.info('Writing Data.  Please refer to the reports dir.')
     if add:
         _write_output_for_add_csv(add, add_file)
-#    if merge:
-#        _write_output_for_merge_csv(merge, merge_file)
+    if merge:
+        _write_output_for_merge_csv(merge, merge_file)
     if delete:
         _write_output_for_delete_csv(delete, delete_file)
-#    if override:
-#        _write_output_for_override_csv(override, override_file)
-#    if override_blanks:
-#        _write_output_for_override_blanks_csv(override_blanks,
-#                                              override_to_blank_file)
-    # IPR Designation Transition
-#    if adv:
-#        _write_output_for_merge_csv_iprd(adv, adv_file, value='adv')
-#    if decom:
-#        _write_output_for_merge_csv_iprd(decom, decom_file, value='decom')
-#    if dup:
-#        _write_output_for_merge_dup_csv(dup, dup_file)
-#    if leaf:
-#        _write_output_for_merge_leaf_csv(leaf, leaf_file)
-#    if ignore:
-#        _write_output_for_merge_ignore_csv(ignore, ignore_file)
-#    if re_ip:
-#        _write_output_for_merge_re_ip_csv(re_ip, re_ip_file)
-#    if drop_reserve:
-#        _write_output_for_merge_drop_reserve_csv(drop_reserve,
-#                                                 drop_reserve_file)
-#    if divest:
-#        _write_output_for_merge_divest_csv(divest, divest_file)
+    if override:
+        _write_output_for_override_csv(override, override_file)
     if disposition:
         _write_output_for_merge_disposition_csv(disposition, disposition_file)
 
